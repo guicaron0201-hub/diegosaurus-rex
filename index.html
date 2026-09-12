@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E1A12">
+<title>Le Parc de Diego</title>
+<style>
+:root{
+  --jungle-900:#0B160F; --jungle-800:#12241A; --jungle-700:#1B3324;
+  --jungle-600:#254634; --moss:#4E7A50;
+  --amber:#E8A33D; --amber-bright:#F7C65B; --bone:#F3E9D2; --bone-dim:#D5CCB6;
+  --danger:#D24B32; --ok:#6FBF73;
+  --crate:#B98B3E;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0;padding:0}
+body{
+  min-height:100dvh; overscroll-behavior-y:none; background:var(--jungle-900); color:var(--bone);
+  font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:17px; line-height:1.5;
+  background-image:
+    radial-gradient(ellipse at 50% -10%, rgba(78,122,80,.28), transparent 60%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.014) 0 2px, transparent 2px 9px);
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+.stencil{
+  font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 32px}
+.screen{display:none;animation:fade .32s ease both}
+.screen.on{display:block}
+#scr-login.on{display:flex;flex-direction:column;justify-content:center;min-height:calc(100dvh - 60px)}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- bandeau ---------- */
+.tape{
+  background:repeating-linear-gradient(45deg,var(--amber) 0 18px,#1a1a17 18px 36px);
+  height:12px;border-radius:2px;margin-bottom:18px;opacity:.9
+}
+.brand{text-align:center;margin-bottom:22px}
+.brand .logo{font-size:44px;line-height:1;display:block;margin-bottom:6px}
+.brand h1{
+  margin:0;font-size:26px;color:var(--amber-bright);
+  font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  text-shadow:0 2px 0 rgba(0,0,0,.5)
+}
+.brand p{margin:6px 0 0;color:var(--bone-dim);font-size:13px;letter-spacing:.22em;text-transform:uppercase}
+
+/* ---------- carte / panneaux ---------- */
+.crate{
+  background:linear-gradient(180deg,var(--jungle-700),var(--jungle-800));
+  border:2px solid var(--jungle-600);
+  border-radius:14px;padding:20px;margin-bottom:16px;
+  box-shadow:0 6px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05)
+}
+.crate h2{margin:0 0 4px;font-size:19px;color:var(--bone)}
+label{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--bone-dim);margin:0 0 8px}
+input[type=text]{
+  width:100%;padding:16px;font-size:24px;text-align:center;
+  font-weight:800;letter-spacing:.28em;text-transform:uppercase;
+  background:var(--jungle-900);color:var(--amber-bright);
+  border:2px solid var(--jungle-600);border-radius:10px;outline:none
+}
+input[type=text]:focus{border-color:var(--amber)}
+input::placeholder{color:#4a5b4d;letter-spacing:.2em}
+button{
+  width:100%;margin-top:14px;padding:17px;border:0;border-radius:10px;
+  background:var(--amber);color:#241a06;font-size:16px;cursor:pointer;
+  font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  box-shadow:0 4px 0 #8f6412; transition:transform .06s, box-shadow .06s
+}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #8f6412}
+button.ghost{background:transparent;color:var(--bone-dim);box-shadow:none;border:2px solid var(--jungle-600);font-size:13px;padding:13px}
+.msg{margin-top:12px;padding:12px;border-radius:8px;font-size:14px;text-align:center;display:none}
+.msg.show{display:block}
+.msg.err{background:rgba(210,75,50,.16);color:#FF9E88;border:1px solid rgba(210,75,50,.5)}
+.msg.ok{background:rgba(111,191,115,.14);color:var(--ok);border:1px solid rgba(111,191,115,.45)}
+
+/* ---------- progression ---------- */
+.teambar{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  background:var(--jungle-800);border:1px solid var(--jungle-600);
+  border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:13px
+}
+.teambar strong{color:var(--amber-bright);letter-spacing:.1em;text-transform:uppercase}
+.progress{display:flex;gap:7px;margin:14px 0 20px}
+.pip{flex:1;height:11px;border-radius:6px;background:var(--jungle-700);border:1px solid var(--moss)}
+.pip.done{background:var(--ok);border-color:var(--ok);box-shadow:0 0 10px rgba(111,191,115,.5)}
+
+/* ---------- enclos ---------- */
+.enclos{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  margin:0 0 10px;padding:14px;border-radius:12px;cursor:pointer;
+  background:linear-gradient(180deg,var(--jungle-700),var(--jungle-800));
+  border:2px solid var(--jungle-600);box-shadow:0 4px 0 rgba(0,0,0,.3);
+  color:var(--bone);font-family:inherit;letter-spacing:normal;text-transform:none;font-weight:400
+}
+.enclos:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.3)}
+.enclos .ico{font-size:30px;line-height:1;flex:0 0 auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.enclos .txt{flex:1;min-width:0}
+.enclos .nm{display:block;font-weight:800;font-size:17px;letter-spacing:.02em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.enclos .zn{display:block;font-size:11.5px;color:var(--bone-dim);letter-spacing:.12em;text-transform:uppercase;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.enclos .st{flex:0 0 auto;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;border-radius:20px;white-space:nowrap}
+.st.lock{background:rgba(210,75,50,.18);color:#FF9E88;border:1px solid rgba(210,75,50,.45)}
+.st.safe{background:rgba(111,191,115,.16);color:var(--ok);border:1px solid rgba(111,191,115,.45)}
+.enclos.done{border-color:rgba(111,191,115,.45)}
+.enclos.done .ico{opacity:.55}
+
+.lab{border-color:var(--crate);background:linear-gradient(180deg,#2a2010,#1d1809)}
+.lab.off{opacity:.5;cursor:not-allowed}
+.hint{
+  background:var(--jungle-900);border-left:4px solid var(--amber);
+  border-radius:0 10px 10px 0;padding:16px;margin:16px 0;font-size:16px;line-height:1.65
+}
+.codes{display:flex;gap:8px;margin:14px 0}
+.codes div{flex:1;text-align:center;background:var(--jungle-900);border:1px solid var(--jungle-600);border-radius:8px;padding:10px 4px}
+.codes .k{font-size:10px;color:var(--bone-dim);letter-spacing:.12em;text-transform:uppercase}
+.codes .v{font-size:20px;font-weight:800;color:var(--amber-bright);letter-spacing:.1em;margin-top:3px}
+
+/* ---------- final ---------- */
+.final{text-align:center;padding:36px 20px}
+.final .big{font-size:72px;line-height:1;margin-bottom:14px}
+.final h2{color:var(--ok);font-size:26px;margin:0 0 10px;letter-spacing:.1em;text-transform:uppercase}
+.final p{color:var(--bone-dim);font-size:16px;margin:0 auto;max-width:34ch}
+.final .go{margin-top:24px;padding:18px;background:rgba(232,163,61,.12);border:2px dashed var(--amber);border-radius:12px;color:var(--amber-bright);font-size:19px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.chrono{margin-top:16px;font-size:13px;color:var(--bone-dim);letter-spacing:.16em;text-transform:uppercase}
+.foot{text-align:center;font-size:11.5px;color:#7E8C78;margin-top:26px;letter-spacing:.16em;text-transform:uppercase}
+
+/* --- petits écrans (iPhone SE, 320px) --- */
+@media (max-width:360px){
+  .wrap{padding:14px 12px 26px}
+  .brand h1{font-size:22px}
+  .brand .logo{font-size:38px}
+  .enclos{padding:12px;gap:10px}
+  .enclos .ico{font-size:26px}
+  .enclos .nm{font-size:15.5px}
+  .enclos .zn{font-size:10.5px;letter-spacing:.08em}
+  .enclos .st{font-size:9px;padding:5px 7px;letter-spacing:.05em}
+  .crate{padding:16px}
+  input[type=text]{font-size:21px;padding:14px}
+  button{padding:15px;font-size:15px}
+  .hint{padding:14px;font-size:15px}
+  .codes .v{font-size:17px}
+  .teambar{padding:9px 11px;font-size:12px}
+}
+/* --- écrans bas (paysage, vieux téléphones) --- */
+@media (max-height:620px){
+  #scr-login.on{min-height:auto;padding-top:8px}
+  .brand{margin-bottom:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ 1. CONNEXION ============ -->
+<section id="scr-login" class="screen on">
+  <div class="tape"></div>
+  <div class="brand">
+    <span class="logo">🦕</span>
+    <h1>Le Parc de Diego</h1>
+    <p>Système de sécurité</p>
+  </div>
+  <div class="crate">
+    <div class="msg err show" style="margin:0 0 16px">⚠️ Alerte — clôtures désactivées sur 3 enclos</div>
+    <label for="inp-team">Code de votre équipe</label>
+    <input id="inp-team" type="text" maxlength="8" placeholder="XXXX00" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <button onclick="login()">Prendre mon poste</button>
+    <div id="msg-login" class="msg err"></div>
+  </div>
+  <p class="foot">Code sur votre fiche de mission</p>
+</section>
+
+<!-- ============ 2. CARTE ============ -->
+<section id="scr-map" class="screen">
+  <div class="tape"></div>
+  <div class="teambar">
+    <span>Équipe <strong id="lbl-team">—</strong></span>
+    <button class="ghost" style="width:auto;margin:0;padding:7px 12px" onclick="logout()">Quitter</button>
+  </div>
+  <h1 class="stencil" style="font-size:21px;color:var(--amber-bright);margin:0 0 4px">Carte du parc</h1>
+  <p style="color:var(--bone-dim);font-size:14px;margin:0"><span id="lbl-done">0</span> enclos sur 3 sécurisés</p>
+  <div class="progress"><div class="pip" id="pip0"></div><div class="pip" id="pip1"></div><div class="pip" id="pip2"></div></div>
+  <div id="list-enclos"></div>
+  <button class="enclos lab off" id="btn-lab" onclick="openLab()">
+    <span class="ico">🧬</span>
+    <span class="txt"><span class="nm">Labo génétique</span><span class="zn">Énigme finale</span></span>
+    <span class="st lock" id="st-lab">Fermé</span>
+  </button>
+  <p class="foot">Votre progression est sauvegardée sur ce téléphone</p>
+</section>
+
+<!-- ============ 3. ÉNIGME ============ -->
+<section id="scr-puzzle" class="screen">
+  <div class="tape"></div>
+  <div class="teambar">
+    <button class="ghost" style="width:auto;margin:0;padding:7px 12px" onclick="show('scr-map')">← Carte</button>
+    <span>Équipe <strong id="lbl-team2">—</strong></span>
+  </div>
+  <div class="crate">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+      <span id="pz-ico" style="font-size:38px"></span>
+      <div>
+        <h2 id="pz-name">—</h2>
+        <div class="zn" style="font-size:12px;color:var(--bone-dim);letter-spacing:.14em;text-transform:uppercase" id="pz-zone">—</div>
+      </div>
+    </div>
+    <div class="hint" id="pz-hint"></div>
+    <label for="inp-code">Code de déverrouillage</label>
+    <input id="inp-code" type="text" maxlength="8" placeholder="????" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <button onclick="submitCode()">Valider le code</button>
+    <div id="msg-puzzle" class="msg"></div>
+  </div>
+</section>
+
+<!-- ============ 4. LABO ============ -->
+<section id="scr-lab" class="screen">
+  <div class="tape"></div>
+  <div class="teambar">
+    <button class="ghost" style="width:auto;margin:0;padding:7px 12px" onclick="show('scr-map')">← Carte</button>
+    <span>Équipe <strong id="lbl-team3">—</strong></span>
+  </div>
+  <div class="crate lab" style="display:block">
+    <div style="text-align:center;font-size:40px;margin-bottom:8px">🧬</div>
+    <h2 style="text-align:center">Labo génétique</h2>
+    <div class="hint">Les 3 enclos sont sécurisés. Entrez les <strong>3 codes à la suite</strong> pour réactiver le système du parc.</div>
+    <div class="codes" id="lab-codes"></div>
+    <label for="inp-final">Code maître</label>
+    <input id="inp-final" type="text" inputmode="numeric" maxlength="16" placeholder="????????" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <button onclick="submitFinal()">Réactiver le système</button>
+    <div id="msg-lab" class="msg"></div>
+  </div>
+</section>
+
+<!-- ============ 5. FINAL ============ -->
+<section id="scr-win" class="screen">
+  <div class="tape"></div>
+  <div class="crate final">
+    <div class="big">🦖</div>
+    <h2>Système réactivé</h2>
+    <p>Le parc est sécurisé. Tous les enclos sont sous contrôle. Beau travail, rangers !</p>
+    <div class="chrono" id="lbl-chrono"></div>
+    <div class="go">🎂 Rejoignez la maison<br>pour le gâteau !</div>
+  </div>
+  <button class="ghost" onclick="logout()">Terminer</button>
+</section>
+
+</div>
+<script>
+/* ============================================================
+   DONNÉES DU JEU — à ajuster (voir GAME_DESIGN.md)
+   ============================================================ */
+const EQUIPES = {
+  "TREX01": "Les T-Rex",
+  "RAPT02": "Les Raptors",
+  "TRIC03": "Les Tricératops",
+  "STEG04": "Les Stégosaures",
+  "DIPL05": "Les Diplodocus",
+  "PTER06": "Les Ptérodactyles"
+};
+
+const ENCLOS = [
+  { id:0, ico:"🦖", nom:"Enclos des Vélociraptors", court:"Vélociraptors", zone:"Le jardin", code:"2604",
+    indice:"Cinq empreintes de griffes sont cachées dans le jardin. Sur chacune, un chiffre est inscrit. Retrouvez-les toutes et remettez les chiffres dans l'ordre des numéros d'empreinte." },
+  { id:1, ico:"🦏", nom:"Enclos du Tricératops", court:"Tricératops", zone:"Terrain de pétanque", code:"13",
+    indice:"Le Tricératops ne se calme qu'avec un score exact. Faites une partie de boules et atteignez précisément le score inscrit sur la pancarte de l'enclos. Ce score est votre code." },
+  { id:2, ico:"🌲", nom:"Zone du T-Rex", court:"Zone du T-Rex", zone:"La forêt", code:"5391",
+    indice:"Quatre indices numérotés sont accrochés aux arbres. Trouvez-les dans l'ordre (1, 2, 3, 4) pour reconstituer le code. Attention : le T-Rex dort dans cette zone... ne le réveillez pas." }
+];
+
+const CODE_FINAL = ENCLOS.map(e => e.code).join("");
+
+/* ============================================================
+   ÉTAT — sauvegardé localement (résiste à une coupure réseau)
+   ============================================================ */
+let team = null, state = null, current = null;
+const KEY = t => "parc-diego:" + t;
+
+function load(t){
+  try { return JSON.parse(localStorage.getItem(KEY(t))) || null; } catch(e){ return null; }
+}
+function save(){
+  try { localStorage.setItem(KEY(team), JSON.stringify(state)); } catch(e){}
+}
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
+  document.getElementById(id).classList.add("on");
+  window.scrollTo(0,0);
+}
+function flash(el, txt, ok){
+  el.textContent = txt;
+  el.className = "msg show " + (ok ? "ok" : "err");
+  if(!ok) setTimeout(() => el.classList.remove("show"), 3500);
+}
+const clean = v => v.trim().toUpperCase().replace(/\s/g,"");
+
+/* ============================================================
+   CONNEXION
+   ============================================================ */
+function login(){
+  const v = clean(document.getElementById("inp-team").value);
+  const m = document.getElementById("msg-login");
+  if(!v) return flash(m, "Entrez le code de votre équipe.");
+  if(!EQUIPES[v]) return flash(m, "Code d'équipe inconnu. Vérifiez votre fiche de mission.");
+  team = v;
+  state = load(v) || { faits: [], debut: Date.now(), fin: null };
+  save();
+  ["lbl-team","lbl-team2","lbl-team3"].forEach(i => document.getElementById(i).textContent = EQUIPES[v]);
+  if(state.fin) return showWin();
+  renderMap();
+  show("scr-map");
+}
+function logout(){
+  team = null; state = null;
+  document.getElementById("inp-team").value = "";
+  show("scr-login");
+}
+
+/* ============================================================
+   CARTE
+   ============================================================ */
+function renderMap(){
+  const box = document.getElementById("list-enclos");
+  box.innerHTML = "";
+  ENCLOS.forEach(e => {
+    const done = state.faits.includes(e.id);
+    const b = document.createElement("button");
+    b.className = "enclos" + (done ? " done" : "");
+    b.onclick = () => openPuzzle(e.id);
+    b.innerHTML =
+      '<span class="ico">' + e.ico + '</span>' +
+      '<span class="txt"><span class="nm">' + e.court + '</span><span class="zn">' + e.zone + '</span></span>' +
+      '<span class="st ' + (done ? "safe" : "lock") + '">' + (done ? "Sécurisé" : "Alerte") + '</span>';
+    box.appendChild(b);
+  });
+  const n = state.faits.length;
+  document.getElementById("lbl-done").textContent = n;
+  for(let i=0;i<3;i++) document.getElementById("pip"+i).className = "pip" + (i < n ? " done" : "");
+  const ready = n === 3;
+  document.getElementById("btn-lab").classList.toggle("off", !ready);
+  const st = document.getElementById("st-lab");
+  st.className = "st " + (ready ? "safe" : "lock");
+  st.textContent = ready ? "Ouvert" : "Fermé";
+}
+
+/* ============================================================
+   ÉNIGME
+   ============================================================ */
+function openPuzzle(id){
+  current = ENCLOS[id];
+  document.getElementById("pz-ico").textContent = current.ico;
+  document.getElementById("pz-name").textContent = current.nom;
+  document.getElementById("pz-zone").textContent = current.zone;
+  document.getElementById("pz-hint").textContent = current.indice;
+  const inp = document.getElementById("inp-code");
+  const num = /^[0-9]+$/.test(current.code);
+  inp.setAttribute("inputmode", num ? "numeric" : "text");
+  inp.setAttribute("placeholder", "?".repeat(current.code.length));
+  const m = document.getElementById("msg-puzzle");
+  m.classList.remove("show");
+  if(state.faits.includes(id)){
+    inp.value = current.code; inp.disabled = true;
+    flash(m, "✓ Enclos déjà sécurisé", true);
+  } else {
+    inp.value = ""; inp.disabled = false;
+  }
+  show("scr-puzzle");
+}
+function submitCode(){
+  const m = document.getElementById("msg-puzzle");
+  const v = clean(document.getElementById("inp-code").value);
+  if(!v) return flash(m, "Entrez le code trouvé dans l'enclos.");
+  if(v !== current.code) return flash(m, "Ce code ne fonctionne pas. Cherchez encore !");
+  if(!state.faits.includes(current.id)){ state.faits.push(current.id); save(); }
+  flash(m, "✓ Enclos sécurisé !", true);
+  setTimeout(() => { renderMap(); show("scr-map"); }, 1100);
+}
+
+/* ============================================================
+   LABO
+   ============================================================ */
+function openLab(){
+  if(state.faits.length < 3) return;
+  const box = document.getElementById("lab-codes");
+  box.innerHTML = "";
+  ENCLOS.forEach((e,i) => {
+    const d = document.createElement("div");
+    d.innerHTML = '<div class="k">Enclos ' + (i+1) + '</div><div class="v">' + e.code + '</div>';
+    box.appendChild(d);
+  });
+  document.getElementById("inp-final").value = "";
+  document.getElementById("msg-lab").classList.remove("show");
+  show("scr-lab");
+}
+function submitFinal(){
+  const m = document.getElementById("msg-lab");
+  const v = clean(document.getElementById("inp-final").value);
+  if(v !== CODE_FINAL) return flash(m, "Le système refuse ce code maître. Vérifiez l'ordre des 3 codes.");
+  state.fin = Date.now(); save();
+  showWin();
+}
+function showWin(){
+  if(state.debut && state.fin){
+    const min = Math.round((state.fin - state.debut) / 60000);
+    document.getElementById("lbl-chrono").textContent = "Parc sécurisé en " + min + " minute" + (min > 1 ? "s" : "");
+  }
+  show("scr-win");
+}
+
+/* Entrée clavier = valider le champ courant */
+document.addEventListener("keydown", e => {
+  if(e.key !== "Enter") return;
+  const scr = document.querySelector(".screen.on").id;
+  if(scr === "scr-login") login();
+  else if(scr === "scr-puzzle") submitCode();
+  else if(scr === "scr-lab") submitFinal();
+});
+</script>
+</body>
+</html>
