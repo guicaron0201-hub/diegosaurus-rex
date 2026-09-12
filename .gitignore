@@ -1,0 +1,41 @@
+# .gitignore — Node / TypeScript / Next.js (Eren Life)
+# À copier en .gitignore à la racine d'un repo Node.
+
+# Dépendances
+node_modules/
+.pnp/
+.pnp.js
+
+# Build / sortie
+dist/
+build/
+out/
+.next/
+.turbo/
+.vercel/
+*.tsbuildinfo
+
+# Secrets et variables d'environnement — NE JAMAIS COMMITER
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Caches et couverture
+.cache/
+coverage/
+.eslintcache
+
+# Système et éditeur
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

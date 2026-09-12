@@ -1,0 +1,27 @@
+# .gitattributes — Eren Life
+# À copier en .gitattributes à la racine de chaque repo.
+# Normalise les fins de ligne au niveau du dépôt : indépendant du core.autocrlf
+# de chaque poste, donc plus de diffs parasites entre Windows, macOS et Linux.
+
+# Par défaut : Git détecte le texte et stocke en LF dans le dépôt.
+* text=auto eol=lf
+
+# Scripts qui DOIVENT garder un EOL spécifique quel que soit l'OS
+*.sh   text eol=lf
+*.ps1  text eol=crlf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Fichiers binaires : jamais de conversion d'EOL ni de diff texte
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.docx binary
+*.xlsx binary
+*.pptx binary
+*.woff binary
+*.woff2 binary
