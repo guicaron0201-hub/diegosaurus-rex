@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <title>Étiquettes du buffet — Le Parc de Diego</title>
-<!-- 4 étiquettes sur une feuille A4 (2 × 2), à découper le long des pointillés.
+<!-- 4 étiquettes chevalets sur une feuille A4 (2 × 2).
+     Découper le long des pointillés gris, puis plier chaque étiquette en deux sur la ligne « pli » :
+     le texte est imprimé sur les deux moitiés (l'une tête en bas), l'étiquette se lit des deux côtés.
      PDF déjà généré : print/etiquettes-A4.pdf (sinon Imprimer > A4 depuis Chrome, marges : aucune) -->
 <style>
 @page{size:A4 portrait;margin:0}
@@ -15,51 +17,35 @@ html,body{margin:0;padding:0;background:#fff}
   display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
   font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;color:#12241A
 }
-.etiquette{
-  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
-  padding:9mm 8mm 8mm;text-align:center;border:.4mm dashed #b9b9b9
-}
-.tape{width:100%;height:3.5mm;border-radius:1mm;background:repeating-linear-gradient(45deg,#E8A33D 0 4.5mm,#1a1a17 4.5mm 9mm)}
-.ico{font-size:40mm;line-height:1;margin-top:4mm}
+/* une étiquette = deux faces séparées par la ligne de pliage */
+.etiquette{position:relative;display:grid;grid-template-rows:1fr 1fr;border:.4mm dashed #b9b9b9}
+.face{display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6mm 8mm;text-align:center}
+.face.haut{transform:rotate(180deg)}   /* se lit de l'autre côté une fois pliée */
+.pli{position:absolute;left:0;right:0;top:50%;border-top:.5mm dashed #E8A33D}
+.pli span{position:absolute;right:3mm;top:-2.4mm;padding:0 1.5mm;background:#fff;font-size:2.6mm;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#E8A33D}
+.tape{width:100%;height:3mm;border-radius:1mm;background:repeating-linear-gradient(45deg,#E8A33D 0 4.5mm,#1a1a17 4.5mm 9mm)}
 .titre{
-  margin:0;font-size:11mm;line-height:1.05;font-weight:900;text-transform:uppercase;letter-spacing:.03em;
+  margin:0;font-size:10mm;line-height:1.05;font-weight:900;text-transform:uppercase;letter-spacing:.03em;
   color:#E8A33D;text-shadow:0 .7mm 0 #8f6412
 }
-.sous{margin:0;font-size:4mm;line-height:1.35;color:#5a4a30;font-style:italic}
-.marque{font-size:3mm;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#8f6412}
-.bas{display:flex;flex-direction:column;align-items:center;gap:3mm;width:100%}
+.sous{margin:0;font-size:3.8mm;line-height:1.35;color:#5a4a30;font-style:italic}
+.marque{font-size:2.8mm;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#8f6412}
 </style>
 </head>
 <body>
-<section class="page">
-  <div class="etiquette">
-    <div class="tape"></div>
-    <div class="ico">🥗</div>
-    <h1 class="titre">Nourriture<br>herbivores</h1>
-    <p class="sous">Réservée aux tricératops,<br>diplodocus et autres brouteurs</p>
-    <div class="bas"><div class="marque">🦕 Le Parc de Diego</div><div class="tape"></div></div>
-  </div>
-  <div class="etiquette">
-    <div class="tape"></div>
-    <div class="ico">🍖</div>
-    <h1 class="titre">Nourriture<br>carnivores</h1>
-    <p class="sous">Attention : les T-Rex<br>se servent en premier</p>
-    <div class="bas"><div class="marque">🦕 Le Parc de Diego</div><div class="tape"></div></div>
-  </div>
-  <div class="etiquette">
-    <div class="tape"></div>
-    <div class="ico">🥚</div>
-    <h1 class="titre">Œufs<br>de T-Rex</h1>
-    <p class="sous">À manipuler avec précaution…<br>la maman n'est pas loin</p>
-    <div class="bas"><div class="marque">🦕 Le Parc de Diego</div><div class="tape"></div></div>
-  </div>
-  <div class="etiquette">
-    <div class="tape"></div>
-    <div class="ico">💩</div>
-    <h1 class="titre">Caca de<br>diplodocus</h1>
-    <p class="sous">Récolté frais ce matin<br>par nos soigneurs</p>
-    <div class="bas"><div class="marque">🦕 Le Parc de Diego</div><div class="tape"></div></div>
-  </div>
-</section>
+<section class="page" id="page"></section>
+<script>
+  const ETIQUETTES = [
+    { titre:"Nourriture<br>herbivores", sous:"Réservée aux tricératops,<br>diplodocus et autres brouteurs" },
+    { titre:"Nourriture<br>carnivores", sous:"Attention : les T-Rex<br>se servent en premier" },
+    { titre:"Œufs<br>de T-Rex",        sous:"À manipuler avec précaution…<br>la maman n'est pas loin" },
+    { titre:"Caca de<br>diplodocus",    sous:"Récolté frais ce matin<br>par nos soigneurs" }
+  ];
+  const face = (e, cote) => '<div class="face ' + cote + '"><div class="tape"></div>' +
+    '<h1 class="titre">' + e.titre + '</h1><p class="sous">' + e.sous + '</p>' +
+    '<div class="marque">Le Parc de Diego</div></div>';
+  document.getElementById("page").innerHTML = ETIQUETTES.map(e =>
+    '<div class="etiquette">' + face(e, "haut") + face(e, "bas") + '<div class="pli"><span>pli</span></div></div>').join("");
+</script>
 </body>
 </html>
