@@ -348,6 +348,10 @@ button.reset{
 .w-q{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;font-size:80px;font-weight:900;color:rgba(243,233,210,.8);text-shadow:0 4px 12px rgba(0,0,0,.7)}
 .w-n{margin-top:10px;font-size:20px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
 .w-s{margin-top:4px;font-size:12px;line-height:1.45;color:#5a4a30}
+
+.bandeau-libre{position:relative;z-index:7;padding:7px 12px;background:#3a1712;color:#FF9E88;font-size:12px;font-weight:700;text-align:center}
+.testbar.libre{position:sticky;bottom:0;z-index:8;margin:24px -16px 0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(11,22,15,.94);border-top:1px solid var(--jungle-600)}
+.testbar.libre #btn-skip{font-size:14px;padding:13px 18px;background:var(--amber);color:#241a06;border:0}
 </style>
 </head>
 <body>
@@ -741,7 +745,7 @@ const GAGES = [
    ÉTAT — sauvegardé localement (résiste à une coupure réseau)
    equipe = index dans EQUIPES ; ok = épreuves réussies ; top = heure du top départ
    ============================================================ */
-const KEY = "parc-diego:partie";
+const KEY = "parc-diego:partie" + (/[?&]libre/.test(location.search) ? ":libre" : "");
 const BOUTON_TEST = true;   // affiche les boutons de test (sauter le temps, redémarrer) sur tous les écrans
 
 /* Horloge commune : toutes les équipes appuient sur TOP en même temps,
@@ -749,6 +753,9 @@ const BOUTON_TEST = true;   // affiche les boutons de test (sauter le temps, red
    Un tour = TRAJET (se rendre à l'épreuve) + DUREE (jouer).
    Ajouter ?test à l'adresse pour une partie accélérée (tours de 40 s). */
 const TEST = /[?&]test/.test(location.search);
+/* Mode libre (?libre) : le temps ne s'écoule pas tout seul, on avance avec le bouton ⏩.
+   Sauvegarde séparée, pour ne pas mélanger avec une vraie partie sur le même téléphone. */
+const LIBRE = /[?&]libre/.test(location.search);
 const DUREE  = TEST ? 40 : 10 * 60;   // durée d'une épreuve, en secondes
 const TRAJET = TEST ? 15 :  1 * 60;   // temps pour changer d'épreuve, en secondes
 const TOURS  = 4;
@@ -804,7 +811,7 @@ function proofsHTML(){
    ============================================================ */
 function horloge(){
   if(!state || !state.top) return null;
-  const t = Math.max(0, Math.floor((Date.now() - state.top) / 1000));
+  const t = LIBRE ? (state.virt || 0) : Math.max(0, Math.floor((Date.now() - state.top) / 1000));
   const cycle = TRAJET + DUREE, r = Math.floor(t / cycle);
   if(r >= TOURS){
     const l = t - TOURS * cycle;
@@ -850,13 +857,16 @@ function allerPhase(h){
 function sauterPhase(){
   const h = horloge();
   if(!h || h.phase === "revelation") return;
-  state.top -= h.reste * 1000; save();
+  if(LIBRE) state.virt = (state.virt || 0) + h.reste; else state.top -= h.reste * 1000;
+  save();
   tick();
 }
 function majBoutonTest(){
   const skip = document.getElementById("btn-skip"), h0 = horloge();
   skip.style.display = h0 && h0.phase !== "revelation" && !state.fin ? "inline-block" : "none";
-  if(h0) skip.textContent = h0.phase === "labo" ? "⏩ Aller à la révélation (test)"
+  if(h0 && LIBRE) skip.textContent = h0.phase === "labo" ? "⏩ Lancer la révélation"
+    : h0.phase === "trajet" ? "⏩ Commencer l'épreuve" : "⏩ Terminer l'épreuve";
+  else if(h0) skip.textContent = h0.phase === "labo" ? "⏩ Aller à la révélation (test)"
     : h0.phase === "trajet" ? "⏩ Fin de la minute (test)" : "⏩ Fin des " + duree(DUREE) + " (test)";
 }
 function tick(){
@@ -1349,7 +1359,11 @@ function skipRiddle(){
   m.textContent = msg; m.className = garde;
 }
 
-if(!BOUTON_TEST) document.getElementById("testbar").style.display = "none";
+if(!BOUTON_TEST && !LIBRE) document.getElementById("testbar").style.display = "none";
+if(LIBRE){
+  document.getElementById("testbar").classList.add("libre");
+  document.body.insertAdjacentHTML("afterbegin", '<div class="bandeau-libre">🧪 Mode libre : le temps ne défile pas, avancez avec le bouton ⏩ en bas</div>');
+}
 
 /* Entrée clavier = valider le champ courant */
 document.addEventListener("keydown", e => {
