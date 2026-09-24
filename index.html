@@ -360,13 +360,13 @@ button.reset{
 
 /* ---------- bouton « Lancer l'épreuve » qui se remplit ---------- */
 .launch-wrap{position:sticky;bottom:10px;z-index:4;margin-top:16px}
-button.launch{position:relative;overflow:hidden;margin:0;padding:19px;font-size:16px;
+.launch{position:relative;overflow:hidden;margin:0;padding:17px;font-size:15px;border-radius:10px;text-align:center;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
   background:var(--jungle-900);color:var(--bone-dim);border:2px solid var(--amber);box-shadow:0 6px 18px rgba(0,0,0,.5)}
-button.launch .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(232,163,61,.35),rgba(232,163,61,.7));transition:width 1s linear}
-button.launch .lbl{position:relative}
-button.launch:disabled{cursor:default;transform:none}
-button.launch.pret{background:var(--ok);border-color:var(--ok);color:#10200f;animation:pouls 1.1s ease-in-out infinite}
-button.launch.pret .fill{display:none}
+.launch .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(232,163,61,.35),rgba(232,163,61,.7));transition:width 1s linear}
+.launch .lbl{position:relative}
+.launch:disabled{cursor:default;transform:none}
+.launch.pret{background:var(--ok);border-color:var(--ok);color:#10200f;animation:pouls 1.1s ease-in-out infinite}
+.launch.pret .fill{display:none}
 @keyframes pouls{50%{transform:scale(1.03)}}
 
 /* ---------- célébration de l'indice ---------- */
@@ -381,10 +381,40 @@ button.launch.pret .fill{display:none}
 @keyframes pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
 
 .now-status{margin:10px 0 0;padding:9px 12px;border-radius:8px;background:rgba(232,163,61,.12);border:1px solid rgba(232,163,61,.45);font-size:14px;font-weight:700;color:var(--amber-bright)}
+
+/* ---------- morsure de départ ---------- */
+.chomp{position:fixed;inset:0;z-index:100;pointer-events:none;display:none;overflow:hidden}
+.chomp.on{display:block}
+.jaw{position:absolute;left:0;right:0;height:50%;background:linear-gradient(180deg,#2d5a2f,#1c3b1f)}
+.jaw.haut{top:0;z-index:1;transform:translateY(-100%);animation:jawHaut 2.1s cubic-bezier(.6,0,.3,1) both}
+.jaw.bas{bottom:0;transform:translateY(100%);animation:jawBas 2.1s cubic-bezier(.6,0,.3,1) both;background:linear-gradient(0deg,#2d5a2f,#1c3b1f)}
+/* les dents */
+.jaw.haut::after,.jaw.bas::after{content:"";position:absolute;left:0;right:0;height:46px;background-size:52px 46px;background-repeat:repeat-x}
+.jaw.haut::after{top:100%;background-image:linear-gradient(to bottom right,#F3E9D2 49%,transparent 51%),linear-gradient(to bottom left,#F3E9D2 49%,transparent 51%);
+  background-size:26px 46px,26px 46px;background-position:0 0,26px 0;
+  -webkit-mask:none}
+.jaw.bas::after{bottom:100%;background-image:linear-gradient(to top right,#F3E9D2 49%,transparent 51%),linear-gradient(to top left,#F3E9D2 49%,transparent 51%);
+  background-size:26px 46px,26px 46px;background-position:13px 0,39px 0}
+@keyframes jawHaut{0%{transform:translateY(-100%)}28%{transform:translateY(-16%)}36%{transform:translateY(-9%)}62%{transform:translateY(-9%)}100%{transform:translateY(-120%)}}
+@keyframes jawBas{0%{transform:translateY(100%)}28%{transform:translateY(16%)}36%{transform:translateY(9%)}62%{transform:translateY(9%)}100%{transform:translateY(120%)}}
+.chomp-t{position:absolute;left:0;right:0;top:9vh;z-index:3;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:2;opacity:0;animation:chompT 2.1s ease both}
+.chomp-t span{font-size:70px;line-height:1}
+.chomp-t b{font-size:46px;font-weight:900;letter-spacing:.08em;color:var(--amber-bright);text-shadow:0 4px 0 #8f6412,0 0 30px rgba(0,0,0,.6)}
+.chomp-t em{font-style:normal;font-size:16px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--bone)}
+@keyframes chompT{0%,30%{opacity:0;transform:scale(.4)}40%{opacity:1;transform:scale(1.15)}50%{transform:scale(1)}66%{opacity:1}82%,100%{opacity:0;transform:scale(1.1)}}
+.chomp.on ~ .wrap{animation:secousse .35s .7s ease 1}
+@keyframes secousse{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
 </style>
 </head>
 <body>
 <div class="wrap">
+
+<!-- Animation de départ d'épreuve : la mâchoire du dino -->
+<div class="chomp" id="chomp" aria-hidden="true">
+  <div class="jaw haut"></div>
+  <div class="jaw bas"></div>
+  <div class="chomp-t"><span>🦖</span><b>CHOMP !</b><em>Début de l'épreuve</em></div>
+</div>
 
 <!-- ============ 1. PROLOGUE ============ -->
 <section id="scr-intro" class="screen on">
@@ -470,9 +500,9 @@ button.launch.pret .fill{display:none}
     <div class="hint"><b>Les règles</b><div id="pz-hint"></div></div>
     <div id="msg-chrono" class="msg err"></div>
     <div class="launch-wrap" id="pz-launch">
-      <button class="launch" id="pz-start" onclick="lancerEpreuve()" disabled>
-        <span class="fill" id="pz-fill"></span><span class="lbl" id="pz-start-t">⏳ Lancer l'épreuve</span>
-      </button>
+      <div class="launch" id="pz-start">
+        <span class="fill" id="pz-fill"></span><span class="lbl" id="pz-start-t">⏳ Départ dans 1:00</span>
+      </div>
     </div>
     <div class="gage" id="pz-gage"></div>
     <div id="pz-letters">
@@ -898,7 +928,13 @@ document.addEventListener("visibilitychange", () => { if(document.visibilityStat
 function allerPhase(h){
   if(h.phase === "revelation") return openReveal(true);
   if(h.phase === "labo") return openMove();
-  // l'équipe a déjà ouvert l'épreuve du tour : on l'actualise (le bouton devient vert)
+  // début d'une épreuve : elle s'ouvre toute seule, avec la morsure du dino
+  if(h.phase === "epreuve" && !reussi(ordre()[h.r])){
+    openPuzzle(ordre()[h.r]);
+    flash(document.getElementById("msg-chrono"), "🟢 C'est parti ! L'épreuve commence maintenant.", true);
+    return morsure();
+  }
+  // l'équipe regarde déjà l'épreuve du nouveau tour : on l'actualise
   if(document.getElementById("scr-puzzle").classList.contains("on") && current === ordre()[h.r])
     return openPuzzle(current);
   showMap();   // sinon : retour au tableau de bord
@@ -1072,10 +1108,9 @@ function openPuzzle(i, trouve){
   const e = EPREUVES[i], h = horloge(), pos = etapeDe(i);
   const pendant = h.phase === "epreuve" && h.r === pos;      // l'épreuve est en cours
   const retard = !reussi(i) && (pos < h.r || h.phase === "labo"); // tour passé sans indice
-  const lance = !!(state.lance && state.lance[i]);
   const avance = !reussi(i) && h.phase === "epreuve" && pos === h.r + 1;   // tour d'avant pas encore fini
-  const attente = !reussi(i) && ((h.phase === "trajet" && h.r === pos) || (pendant && !lance) || avance);   // on lit les règles
-  const cherche = e.cherche && !trouve && pendant && lance;    // phase 1 : trouver le maître du jeu caché
+  const attente = !reussi(i) && ((h.phase === "trajet" && h.r === pos) || avance);   // on lit les règles
+  const cherche = e.cherche && !trouve && pendant;    // phase 1 : trouver le maître du jeu caché
   const enigmes = e.type === "enigmes";
 
   document.getElementById("pz-num").textContent = pos + 1;
@@ -1090,7 +1125,7 @@ function openPuzzle(i, trouve){
   document.getElementById("pz-launch").style.display = attente ? "block" : "none";
   document.getElementById("lbl-code").textContent = e.label || "Code de déverrouillage";
 
-  const jouable = !reussi(i) && ((pendant && lance && !cherche) || retard);
+  const jouable = !reussi(i) && ((pendant && !cherche) || retard);
   document.getElementById("pz-seek").style.display = cherche && !reussi(i) ? "block" : "none";
   const duel = e.type === "duel";
   document.getElementById("pz-code").style.display = jouable && !duel && !(enigmes && !retard) ? "block" : "none";
@@ -1107,9 +1142,8 @@ function openPuzzle(i, trouve){
   m.classList.remove("show");
   if(reussi(i)) flash(m, "✓ Épreuve déjà réussie !", true);
   else if(retard) flash(m, finTexte(i), false, true);
-  else if(h.phase === "trajet" && h.r === pos) flash(m, "⛔ Ne commencez pas encore ! Lisez les règles : le bouton en bas deviendra vert à la fin du compte à rebours.", false, true);
+  else if(h.phase === "trajet" && h.r === pos) flash(m, "⛔ Ne commencez pas encore ! Lisez les règles : l'épreuve se lancera toute seule à la fin du compte à rebours.", false, true);
   else if(avance) flash(m, "⏳ Le tour en cours n'est pas fini : restez sur place et lisez les règles. Le départ sera donné à la fin du compte à rebours.", false, true);
-  else if(attente) flash(m, "🟢 C'est l'heure ! Appuyez sur « Lancer l'épreuve ».", true);
   montrerGage(document.getElementById("pz-gage"), (retard || perdu) && !reussi(i) ? i : null);
 
   const inp = document.getElementById("inp-code");
@@ -1273,32 +1307,28 @@ function openMove(enAvance){
   show("scr-move");
   tick();
 }
-/* Bouton « Lancer l'épreuve » : se remplit pendant la minute d'attente, cliquable à la fin */
+/* Barre d'attente : se remplit pendant la minute, l'épreuve démarre toute seule à la fin */
 function majLancer(h){
-  const btn = document.getElementById("pz-start");
-  if(!btn || current === null || !["trajet","epreuve"].includes(h.phase)) return;
+  if(current === null || !["trajet","epreuve"].includes(h.phase)) return;
+  const fill = document.getElementById("pz-fill"), txt = document.getElementById("pz-start-t");
   if(h.phase === "epreuve" && etapeDe(current) === h.r + 1){
     // ouvert en avance : on attend la fin du tour, puis la minute de trajet
-    document.getElementById("pz-fill").style.width = "0%";
-    btn.disabled = true; btn.classList.remove("pret");
-    document.getElementById("pz-start-t").textContent = "⏳ Départ dans " + mmss(h.reste + TRAJET);
+    fill.style.width = "0%";
+    txt.textContent = "⏳ Départ dans " + mmss(h.reste + TRAJET);
     return;
   }
-  if(h.r !== etapeDe(current)) return;
-  const pret = h.phase === "epreuve";
-  const x = pret ? 1 : 1 - h.reste / TRAJET;
-  document.getElementById("pz-fill").style.width = (x * 100) + "%";
-  btn.disabled = !pret;
-  btn.classList.toggle("pret", pret);
-  document.getElementById("pz-start-t").textContent = pret ? "🟢 Lancer l'épreuve !" : "⏳ Lancer l'épreuve · " + mmss(h.reste);
+  if(h.phase !== "trajet" || h.r !== etapeDe(current)) return;
+  fill.style.width = ((1 - h.reste / TRAJET) * 100) + "%";
+  txt.textContent = "⏳ Départ dans " + mmss(h.reste) + " · lancement automatique";
 }
-function lancerEpreuve(){
-  const h = horloge();
-  if(h.phase !== "epreuve" || h.r !== etapeDe(current)) return;
-  state.lance = state.lance || {};
-  state.lance[current] = true; save();
-  openPuzzle(current);
-  flash(document.getElementById("msg-chrono"), "🟢 C'est parti ! L'épreuve commence maintenant.", true);
+
+/* L'animation de départ : une mâchoire de dino qui se referme sur l'écran */
+function morsure(){
+  const c = document.getElementById("chomp");
+  c.classList.remove("on"); void c.offsetWidth;   // relance l'animation
+  c.classList.add("on");
+  alerte();
+  setTimeout(() => c.classList.remove("on"), 2300);
 }
 function goMove(){ openLab(); }
 function lateGagne(){
@@ -1543,6 +1573,7 @@ else {
   garderEcran();
   if(h.phase === "revelation") openReveal(false);
   else if(h.phase === "labo") openMove();
+  else if(h.phase === "epreuve" && !reussi(ordre()[h.r])) openPuzzle(ordre()[h.r]);
   else showMap();
 }
 </script>
