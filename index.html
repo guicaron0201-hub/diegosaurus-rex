@@ -466,11 +466,11 @@ button.reset{
       <img src="diego.jpg" alt="" onerror="this.parentNode.classList.add('vide');this.remove()">
       <span class="w-q">?</span>
     </div>
-    <div class="w-n">Diegosaurus Rex</div>
-    <div class="w-s">Espèce très rare · échappé cette nuit<br>Seule image connue : une caméra du parc</div>
+    <div class="w-n">Espèce inconnue</div>
+    <div class="w-s">Nouvelle espèce · échappée cette nuit<br>Seule image connue : une caméra du parc</div>
   </div>
   <div class="crate">
-    <div class="msg err show" style="margin:0 0 16px">⚠️ Alerte — le Diegosaurus Rex s'est échappé</div>
+    <div class="msg err show" style="margin:0 0 16px">⚠️ Alerte — une nouvelle espèce s'est échappée</div>
     <div class="radio" id="intro-radio"></div>
     <div class="dots" id="intro-dots"></div>
     <button id="btn-intro" onclick="nextIntro()">Suivant</button>
@@ -691,15 +691,14 @@ button.reset{
       <h2>On l'a retrouvé !</h2>
       <p class="rv-cuisine">Il était <strong>dans la cuisine</strong>… en train de piquer des parts de son gâteau d'anniversaire ! 🍰</p>
       <img class="diego" src="diego.jpg" alt="Diego" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'big',textContent:'🦕'}))">
-      <p>C'est bien lui : <strong style="color:var(--bone)">le Diegosaurus Rex</strong>, alias <strong style="color:var(--amber-bright)">DIEGO</strong>, qui fête aujourd'hui son 1er anniversaire.</p>
-      <div class="go">🎂 Joyeux anniversaire Diego !</div>
+      <p>C'est bien lui : <strong style="color:var(--bone)">le Diegosaurus Rex</strong>, alias <strong style="color:var(--amber-bright)">DIEGO</strong> !</p>
+      <div class="go">😮‍💨 Ouf ! On l'a retrouvé à temps<br>pour son premier anniversaire 🎂</div>
       <p style="margin-top:14px;font-size:14px">Tous à la cuisine… avant qu'il ne reste plus une miette. Et attention, le T-Rex n'est jamais loin de lui.</p>
     </div>
     <div class="crate bilan">
       <div class="tag" id="rv-team"></div>
       <h2 id="rv-titre"></h2>
       <div class="stats" id="rv-stats"></div>
-      <p class="wait">Ornella annonce maintenant les résultats des 4 équipes !</p>
     </div>
     <button class="ghost" onclick="restart()">Recommencer la partie</button>
   </div>
@@ -722,10 +721,10 @@ const ALAIN = "🦏 Alain le Tricératops";
 
 const PROLOGUE = [
   ["Bienvenue au Parc de Diego ! Je suis Ornella, la directrice du parc.",
-   "Il y a un an jour pour jour, notre labo a vu naître une espèce toute nouvelle, la plus rare du parc : le <strong>Diegosaurus Rex</strong> !"],
-  ["Mais cette nuit, une panne a coupé toutes les clôtures… et le Diegosaurus Rex s'est échappé !",
+   "Il y a un an jour pour jour, notre labo a vu naître <strong>une espèce toute nouvelle</strong>, la plus rare du parc. Elle n'a même pas encore de nom officiel !"],
+  ["Mais cette nuit, une panne a coupé toutes les clôtures… et <strong>le petit de cette nouvelle espèce</strong> s'est échappé !",
    "Personne ne l'a revu depuis sa naissance au labo. On ne sait même pas à quoi il ressemble aujourd'hui."],
-  ["Votre mission, rangers : réussir les <strong>4 épreuves du parc</strong>, rassembler les indices qu'il a laissés… et <strong>retrouver le Diegosaurus Rex</strong>.",
+  ["Votre mission, rangers : réussir les <strong>4 épreuves du parc</strong>, rassembler les indices qu'il a laissés… et <strong>retrouver le petit fugitif</strong>.",
    "Attention : les maîtres du jeu sont redoutables et ne font aucun cadeau. Choisissez votre équipe : votre première piste vous attend !"]
 ];
 
@@ -734,7 +733,7 @@ const PROLOGUE = [
 const EPREUVES = [
   { ico:"🦏", nom:"Le défi d'Alain", court:"Pétanque contre Alain", zone:"L'enclos d'Alain le Tricératops", lieu:"le terrain de pétanque", type:"duel", voix:ALAIN, maitre:"Alain",
     route:"Direction l'enclos d'Alain le Tricératops, sur le terrain de pétanque : Alain vous attend de pied ferme !",
-    arrivee:"Je suis Alain, le Tricératops ! Le Diegosaurus Rex a laissé tomber quelque chose dans mon enclos cette nuit… Vous le voulez ? Alors battez-moi aux boules… si vous en êtes capables : personne ne m'a jamais battu !",
+    arrivee:"Je suis Alain, le Tricératops ! Le petit fugitif a laissé tomber quelque chose dans mon enclos cette nuit… Vous le voulez ? Alors battez-moi aux boules… si vous en êtes capables : personne ne m'a jamais battu !",
     indice:{ etapes:[
         "Alain lance le cochonnet.",
         "Votre équipe tire <strong>5 boules</strong>.",
@@ -743,12 +742,12 @@ const EPREUVES = [
       gagner:"Vous remportez une manche ? Appuyez sur <strong>« 🏆 Gagné »</strong> pour découvrir l'indice. Une seule victoire suffit… mais Alain est très fort ! S'il gagne, on rejoue une manche tant qu'il reste du temps.",
       sinon:"Plus le temps de rejouer, ou vous jetez l'éponge ? Appuyez sur <strong>« 💀 Perdu »</strong> : l'app vous donne votre gage." },
     preuve:{ ico:"🍼", nom:"Un biberon", court:"Biberon",
-      texte:"Alain vous tend ce que le petit a oublié dans son enclos : un biberon encore tiède, avec des traces de dents sur la tétine. Vide, évidemment. D'après Alain, le Diegosaurus Rex en réclame un toutes les trois heures, en hurlant plus fort qu'un T-Rex… y compris à 4 h du matin. Conclusion : il boit encore du lait, et il sait se faire entendre." } },
+      texte:"Alain vous tend ce que le petit a oublié dans son enclos : un biberon encore tiède, avec des traces de dents sur la tétine. Vide, évidemment. D'après Alain, le petit fugitif en réclame un toutes les trois heures, en hurlant plus fort qu'un T-Rex… y compris à 4 h du matin. Conclusion : il boit encore du lait, et il sait se faire entendre." } },
 
   { ico:"🔤", nom:"Le mot secret de la Serre", court:"Chasse aux lettres", zone:"La Serre préhistorique", lieu:"le jardin", code:"ECLORE", type:"lettres", nb:6, voix:ORNELLA,
     label:"Le mot secret",
-    route:"Direction la Serre préhistorique, dans le jardin : le Diegosaurus Rex y a semé un mot secret, lettre par lettre…",
-    arrivee:"Rangers, cette nuit, le Diegosaurus Rex a semé des lettres partout dans le jardin. Retrouvez-les et devinez le mot secret ! Un indice : c'est ce que font les œufs de dinosaure quand leur heure est venue…",
+    route:"Direction la Serre préhistorique, dans le jardin : le petit fugitif y a semé un mot secret, lettre par lettre…",
+    arrivee:"Rangers, cette nuit, le petit fugitif a semé des lettres partout dans le jardin. Retrouvez-les et devinez le mot secret ! Un indice : c'est ce que font les œufs de dinosaure quand leur heure est venue…",
     indice:{ etapes:[
         "<strong>6 lettres</strong> sont cachées dans le jardin.",
         "Quand vous en trouvez une, <strong>laissez-la à sa place</strong> pour les autres équipes !",
@@ -758,11 +757,11 @@ const EPREUVES = [
       sinon:"Chrono à zéro : vous pouvez encore taper le mot pendant le trajet." },
     finChrono:"⏰ Temps écoulé ! Pas grave : vous pouvez encore deviner le mot avec les lettres trouvées et le taper ici.",
     preuve:{ ico:"👣", nom:"Une empreinte pointure 21", court:"Pointure 21",
-      texte:"ÉCLORE, bravo ! Et juste à côté de la dernière lettre : une empreinte minuscule dans la terre. Les scientifiques l'ont mesurée : pointure 21. Pas de griffes, pas d'écailles… cinq petits orteils tout ronds. Le Diegosaurus Rex marche depuis peu et, visiblement, il tombe souvent : on retrouve une empreinte de fesses tous les trois pas." } },
+      texte:"ÉCLORE, bravo ! Et juste à côté de la dernière lettre : une empreinte minuscule dans la terre. Les scientifiques l'ont mesurée : pointure 21. Pas de griffes, pas d'écailles… cinq petits orteils tout ronds. Le petit fugitif marche depuis peu et, visiblement, il tombe souvent : on retrouve une empreinte de fesses tous les trois pas." } },
 
   { ico:"🎯", nom:"L'antre du T-Rex", court:"Fléchettes contre le Dresseur", zone:"La forêt du T-Rex", lieu:"la forêt", type:"duel", voix:DRESSEUR, maitre:"le Dresseur",
     route:"Direction la forêt du T-Rex : le Dresseur vous attend… et son T-Rex n'est jamais loin !",
-    arrivee:"Halte ! Je suis le Dresseur du T-Rex. Mon T-Rex a vu le Diegosaurus Rex cette nuit… Si vous voulez savoir ce qu'il a trouvé, battez-moi aux fléchettes. Je n'ai jamais raté une cible !",
+    arrivee:"Halte ! Je suis le Dresseur du T-Rex. Mon T-Rex a vu le petit fugitif cette nuit… Si vous voulez savoir ce qu'il a trouvé, battez-moi aux fléchettes. Je n'ai jamais raté une cible !",
     indice:{ etapes:[
         "Votre équipe lance <strong>5 fléchettes</strong> et additionne ses points.",
         "Le Dresseur lance ensuite ses <strong>5 fléchettes</strong>.",
@@ -770,11 +769,11 @@ const EPREUVES = [
       gagner:"Vous remportez une manche ? Appuyez sur <strong>« 🏆 Gagné »</strong> pour découvrir l'indice. Une seule victoire suffit… mais il est redoutable ! S'il gagne, on rejoue une manche tant qu'il reste du temps.",
       sinon:"Plus le temps de rejouer, ou vous jetez l'éponge ? Appuyez sur <strong>« 💀 Perdu »</strong> : l'app vous donne votre gage." },
     preuve:{ ico:"🌙", nom:"Le rapport secret des parents", court:"Rapport",
-      texte:"Le Dresseur s'incline et vous tend un dossier que son T-Rex a déterré : « Rapport confidentiel des parents du Diegosaurus Rex ». Nuits complètes depuis sa naissance : 0. Réveils par nuit : entre 2 et 11. Heure de réveil préférée : 5 h 47. Cafés bus par les parents : 1 247, et le compteur tourne encore. Berceuse chantée pour l'endormir : toujours la même, environ 3 000 fois. Conclusion du rapport : l'espèce ne dort jamais… mais elle est adorable." } },
+      texte:"Le Dresseur s'incline et vous tend un dossier que son T-Rex a déterré : « Rapport confidentiel des parents du petit fugitif ». Nuits complètes depuis sa naissance : 0. Réveils par nuit : entre 2 et 11. Heure de réveil préférée : 5 h 47. Cafés bus par les parents : 1 247, et le compteur tourne encore. Berceuse chantée pour l'endormir : toujours la même, environ 3 000 fois. Conclusion du rapport : l'espèce ne dort jamais… mais elle est adorable." } },
 
   { ico:"🏓", nom:"Le Dino-pong d'Ornella", court:"Pong contre Ornella", zone:"Le QG de la Directrice", lieu:"la table de ping-pong, dans le jardin", type:"duel", voix:ORNELLA, maitre:"Ornella",
     route:"Direction le QG de la Directrice, à la table de ping-pong du jardin : Ornella vous défie en personne au Dino-pong !",
-    arrivee:"Vous voilà enfin ! Le Diegosaurus Rex a oublié quelque chose dans mon bureau… Je vous le donne si vous me battez au Dino-pong. Mais je vous préviens : je suis la championne du parc !",
+    arrivee:"Vous voilà enfin ! Le petit fugitif a oublié quelque chose dans mon bureau… Je vous le donne si vous me battez au Dino-pong. Mais je vous préviens : je suis la championne du parc !",
     indice:{ etapes:[
         "Votre équipe et Ornella lancent <strong>en même temps</strong> dans les verres d'en face.",
         "Un joueur qui met une balle <strong>sort du jeu</strong> : ses coéquipiers continuent.",
@@ -783,11 +782,11 @@ const EPREUVES = [
       sinon:"Moins de verres qu'Ornella ? Appuyez sur <strong>« 💀 Perdu »</strong> : l'app vous donne votre gage." },
     finChrono:"⏰ Fin du match ! Comptez les verres : plus qu'Ornella ? Appuyez sur « 🏆 Gagné ». Sinon, faites votre gage et appuyez sur « ✅ Gage fait ».",
     preuve:{ ico:"📱", nom:"Une télécommande mâchouillée", court:"Télécommande",
-      texte:"Beau joueur, Ornella vous montre ce qu'elle a trouvé sous son bureau : une télécommande entièrement mâchouillée, trempée de bave, avec les touches 4, 7 et « Volume + » arrachées. Le Diegosaurus Rex a une passion dans la vie : tout ce qui n'est pas un jouet. Clés, téléphones, chaussures, câbles… Plus c'est interdit, plus c'est délicieux." } }
+      texte:"Beau joueur, Ornella vous montre ce qu'elle a trouvé sous son bureau : une télécommande entièrement mâchouillée, trempée de bave, avec les touches 4, 7 et « Volume + » arrachées. Le petit fugitif a une passion dans la vie : tout ce qui n'est pas un jouet. Clés, téléphones, chaussures, câbles… Plus c'est interdit, plus c'est délicieux." } }
 ];
 
 const LABO = { ico:"🧬", nom:"Le Labo génétique", court:"Labo génétique", zone:"Le Labo génétique", lieu:"devant la maison",
-  route:"Toutes les épreuves sont terminées ! Rendez-vous devant la maison avec vos 4 indices : le labo génétique va démasquer le Diegosaurus Rex." };
+  route:"Toutes les épreuves sont terminées ! Rendez-vous devant la maison avec vos 4 indices : le labo génétique va démasquer le petit fugitif." };
 
 /* 4 équipes, 4 épreuves : chaque équipe commence ailleurs et tourne dans le même sens.
    À chaque round, chaque épreuve accueille exactement une équipe. */
@@ -798,14 +797,14 @@ const EQUIPES = [
   { nom:"Les Ptéro-Éclairs",ico:"⚡", couleur:"#F7C65B", ordre:[3,0,1,2] }
 ];
 
-/* Fiches du labo : reconnaître le Diegosaurus Rex grâce aux 4 indices */
+/* Fiches du labo : reconnaître le petit fugitif grâce aux 4 indices */
 /* Liste des suspects du labo : un seul correspond aux 4 indices */
 const SUSPECTS = [
   { ico:"🦖", nom:"Le T-Rex", traits:["Pointure 58", "Mange de la viande", "Dort 14 h par nuit", "Passion : rugir très fort"],
     non:"Innocent ! Pointure 58, ce n'est pas du 21. Et lui dort comme un loir." },
   { ico:"🦎", nom:"Le Vélociraptor", traits:["Pointure 32", "Mange des insectes", "Dort le jour", "Passion : courir vite"],
     non:"Innocent ! Pointure 32, bien trop grand. Et il n'a jamais touché une télécommande." },
-  { ico:"🥚", nom:"Espèce inconnue", traits:["Pointure 21", "Boit au biberon", "Ne dort jamais", "Passion : mâchouiller les télécommandes"],
+  { ico:"🥚", nom:"Le Diegosaurus Rex", traits:["Pointure 21", "Boit au biberon", "Ne dort jamais", "Passion : mâchouiller les télécommandes"],
     oui:true },
   { ico:"🦏", nom:"Alain le Tricératops", traits:["Pointure 45", "Mange de l'herbe", "Fait ses nuits", "Passion : la pétanque"],
     non:"Innocent ! Alain fait ses nuits et ne boit pas au biberon… du moins pas en public." },
@@ -815,7 +814,7 @@ const SUSPECTS = [
 /* Résumé de chaque indice, affiché au labo (même vocabulaire que les fiches) */
 const RESUME_INDICE = { "👣":"Pointure 21", "🍼":"Boit au biberon", "🌙":"Ne dort jamais", "📱":"Mâchouille les télécommandes" };
 const LAB_INTRO = ["Bravo, rangers ! Vos 4 indices sont arrivés au labo.",
-  "Le Diegosaurus Rex se cache parmi ces <strong>5 suspects</strong>. Comparez chaque fiche avec vos indices et désignez le bon !"];
+  "Le petit fugitif se cache parmi ces <strong>5 suspects</strong>. À quelle espèce appartient-il ? Comparez chaque fiche avec vos indices et désignez le bon !"];
 const TOP_TXT = (e, duree, trajet) => [
   "Rangers, préparez-vous ! Quand je dirai <strong>« 3, 2, 1… TOP ! »</strong>, toutes les équipes appuient en même temps sur le bouton.",
   "Après le TOP, vous avez " + trajet + " pour rejoindre votre première épreuve : <strong>" + e.court + "</strong> (📍 " + (e.lieu || e.zone) + "). <strong>Ne commencez qu'à la fin de ce compte à rebours !</strong>",
@@ -1486,7 +1485,7 @@ async function openReveal(anime){
   if(!anime){ seq.style.display = "none"; fin.style.display = "block"; return; }
   seq.style.display = "flex"; fin.style.display = "none";
 
-  etape("🎉", "BRAVO !", "Vous avez démasqué le suspect n°3 : l'espèce inconnue !");
+  etape("🎉", "BRAVO !", "Vous avez démasqué le suspect n°3 : le Diegosaurus Rex !");
   alerte(); await pause(2600);
 
   etape("🧬", "Analyse de l'ADN…", ETAPES_ADN[0], { barre:true });
