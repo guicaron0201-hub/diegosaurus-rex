@@ -39,3 +39,6 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Photo originale (lourde) : seule la version allégée diego.jpg est publiée
+diegosaurus.png

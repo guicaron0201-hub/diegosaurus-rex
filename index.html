@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0E1A12">
-<title>Le Parc de Diego</title>
+<title>Diegosaurus Rex</title>
 <style>
 :root{
   --jungle-900:#0B160F; --jungle-800:#12241A; --jungle-700:#1B3324;
@@ -324,7 +324,7 @@ button.reset{
 @keyframes scan{to{transform:rotate(360deg)}}
 .rv-radar-t{font-size:22px;font-weight:800;color:var(--ok);text-align:center;letter-spacing:.04em}
 .reveal .tag{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ok);margin-bottom:14px}
-.reveal .diego{display:block;width:100%;max-width:320px;aspect-ratio:1;object-fit:cover;margin:0 auto 16px;border-radius:16px;border:4px solid var(--amber)}
+.reveal .diego{display:block;width:100%;max-width:320px;aspect-ratio:1;object-fit:cover;object-position:50% 38%;margin:0 auto 16px;border-radius:16px;border:4px solid var(--amber)}
 .reveal h2{font-size:30px}
 .bilan{text-align:center}
 .bilan .tag{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
@@ -333,6 +333,21 @@ button.reset{
 .stats div{flex:1;padding:12px 6px;border-radius:10px;background:var(--jungle-900);border:1px solid var(--jungle-600)}
 .stats b{display:block;font-size:26px;color:var(--bone)}
 .stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--bone-dim)}
+
+/* ---------- avis de recherche (écran d'accueil) ---------- */
+.wanted{
+  width:78%;max-width:320px;margin:0 auto 22px;padding:14px 14px 12px;transform:rotate(-2deg);
+  background:#F3E9D2;color:#2a1f0e;border-radius:4px;text-align:center;
+  box-shadow:0 10px 24px rgba(0,0,0,.55), inset 0 0 30px rgba(139,99,40,.25)
+}
+.w-t{font-size:16px;font-weight:900;letter-spacing:.1em;white-space:nowrap;text-transform:uppercase;color:#8f2d1a;margin-bottom:10px}
+.w-photo{position:relative;aspect-ratio:1;border:3px solid #2a1f0e;overflow:hidden;background:#1a1a17}
+.w-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 38%;filter:blur(5px) grayscale(.85) contrast(1.2) brightness(.9);transform:scale(1.1)}
+.w-photo::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 4px)}
+.w-photo.vide::before{content:"🦖";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:110px;filter:brightness(0) opacity(.85)}
+.w-q{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;font-size:80px;font-weight:900;color:rgba(243,233,210,.8);text-shadow:0 4px 12px rgba(0,0,0,.7)}
+.w-n{margin-top:10px;font-size:20px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.w-s{margin-top:4px;font-size:12px;line-height:1.45;color:#5a4a30}
 </style>
 </head>
 <body>
@@ -343,8 +358,19 @@ button.reset{
   <div class="tape"></div>
   <div class="brand">
     <span class="logo">🦕</span>
-    <h1>Le Parc de Diego</h1>
-    <p>Avis de recherche</p>
+    <h1>Diegosaurus Rex</h1>
+    <p>Le Parc de Diego</p>
+  </div>
+
+  <!-- Avis de recherche : la photo de Diego (diego.jpg), floutée jusqu'à la révélation finale -->
+  <div class="wanted">
+    <div class="w-t">Avis de recherche</div>
+    <div class="w-photo">
+      <img src="diego.jpg" alt="" onerror="this.parentNode.classList.add('vide');this.remove()">
+      <span class="w-q">?</span>
+    </div>
+    <div class="w-n">Diegosaurus Rex</div>
+    <div class="w-s">Espèce très rare · échappé cette nuit<br>Seule image connue : une caméra du parc</div>
   </div>
   <div class="crate">
     <div class="msg err show" style="margin:0 0 16px">⚠️ Alerte — le Diegosaurus Rex s'est échappé</div>
