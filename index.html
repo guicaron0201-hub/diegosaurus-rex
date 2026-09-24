@@ -1,0 +1,1354 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E1A12">
+<title>Le Parc de Diego</title>
+<style>
+:root{
+  --jungle-900:#0B160F; --jungle-800:#12241A; --jungle-700:#1B3324;
+  --jungle-600:#254634; --moss:#4E7A50;
+  --amber:#E8A33D; --amber-bright:#F7C65B; --bone:#F3E9D2; --bone-dim:#D5CCB6;
+  --danger:#D24B32; --ok:#6FBF73;
+  --crate:#B98B3E;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0;padding:0}
+body{
+  min-height:100dvh; overscroll-behavior-y:none; background:var(--jungle-900); color:var(--bone);
+  font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:17px; line-height:1.5;
+  background-image:
+    radial-gradient(ellipse at 50% -10%, rgba(78,122,80,.28), transparent 60%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.014) 0 2px, transparent 2px 9px);
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+.stencil{
+  font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 32px}
+.screen{display:none;animation:fade .32s ease both}
+.screen.on{display:block}
+#scr-intro.on{display:flex;flex-direction:column;justify-content:center;min-height:calc(100dvh - 60px)}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- bandeau ---------- */
+.tape{
+  background:repeating-linear-gradient(45deg,var(--amber) 0 18px,#1a1a17 18px 36px);
+  height:12px;border-radius:2px;margin-bottom:18px;opacity:.9
+}
+.brand{text-align:center;margin-bottom:22px}
+.brand .logo{font-size:44px;line-height:1;display:block;margin-bottom:6px}
+.brand h1{
+  margin:0;font-size:26px;color:var(--amber-bright);
+  font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  text-shadow:0 2px 0 rgba(0,0,0,.5)
+}
+.brand p{margin:6px 0 0;color:var(--bone-dim);font-size:13px;letter-spacing:.22em;text-transform:uppercase}
+
+/* ---------- carte / panneaux ---------- */
+.crate{
+  background:linear-gradient(180deg,var(--jungle-700),var(--jungle-800));
+  border:2px solid var(--jungle-600);
+  border-radius:14px;padding:20px;margin-bottom:16px;
+  box-shadow:0 6px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05)
+}
+.crate h2{margin:0 0 4px;font-size:19px;color:var(--bone)}
+label{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--bone-dim);margin:0 0 8px}
+input[type=text]{
+  width:100%;padding:16px;font-size:24px;text-align:center;
+  font-weight:800;letter-spacing:.28em;text-transform:uppercase;
+  background:var(--jungle-900);color:var(--amber-bright);
+  border:2px solid var(--jungle-600);border-radius:10px;outline:none
+}
+input[type=text]:focus{border-color:var(--amber)}
+input::placeholder{color:#4a5b4d;letter-spacing:.2em}
+button{
+  width:100%;margin-top:14px;padding:17px;border:0;border-radius:10px;
+  background:var(--amber);color:#241a06;font-size:16px;cursor:pointer;
+  font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  box-shadow:0 4px 0 #8f6412; transition:transform .06s, box-shadow .06s
+}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #8f6412}
+button.ghost{background:transparent;color:var(--bone-dim);box-shadow:none;border:2px solid var(--jungle-600);font-size:13px;padding:13px}
+.msg{margin-top:12px;padding:12px;border-radius:8px;font-size:14px;text-align:center;display:none}
+.msg.show{display:block}
+.msg.err{background:rgba(210,75,50,.16);color:#FF9E88;border:1px solid rgba(210,75,50,.5)}
+.msg.ok{background:rgba(111,191,115,.14);color:var(--ok);border:1px solid rgba(111,191,115,.45)}
+
+/* ---------- bulles des personnages ---------- */
+.radio{
+  background:var(--jungle-900);border:1px solid var(--jungle-600);border-radius:12px;
+  padding:14px 16px;margin:0 0 16px;font-size:16px;line-height:1.6
+}
+.radio .who{
+  display:flex;align-items:center;gap:8px;margin-bottom:8px;
+  font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)
+}
+.radio .who::after{content:"";flex:1;height:1px;background:var(--jungle-600)}
+.radio p{margin:0}
+.radio p + p{margin-top:10px}
+.dots{display:flex;justify-content:center;gap:7px;margin:4px 0 0}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--jungle-600)}
+.dots i.on{background:var(--amber)}
+
+/* ---------- barre du haut ---------- */
+.teambar{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  background:var(--jungle-800);border:1px solid var(--jungle-600);
+  border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:13px
+}
+.teambar strong{color:var(--amber-bright);letter-spacing:.1em;text-transform:uppercase}
+
+/* ---------- pièces à conviction ---------- */
+.proofs{display:flex;gap:8px;margin:12px 0 20px}
+.proofs div{
+  flex:1;text-align:center;background:var(--jungle-900);border:1px dashed var(--jungle-600);
+  border-radius:10px;padding:10px 4px 8px
+}
+.proofs .e{font-size:26px;line-height:1.1;display:block}
+.proofs .n{font-size:10px;color:var(--bone-dim);letter-spacing:.1em;text-transform:uppercase;display:block;margin-top:4px}
+.proofs div.got{border-style:solid;border-color:var(--crate);background:rgba(185,139,62,.1)}
+.proofs div:not(.got) .e{color:#4a5b4d;font-weight:800}
+
+/* ---------- chemin de l'enquête ---------- */
+.trail{position:relative;margin:0 0 8px;padding-left:34px}
+.trail::before{
+  content:"";position:absolute;left:13px;top:18px;bottom:18px;
+  border-left:3px dashed var(--jungle-600)
+}
+.step{position:relative;margin:0 0 12px}
+.step .dot{
+  position:absolute;left:-34px;top:14px;width:29px;height:29px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
+  background:var(--jungle-800);border:2px solid var(--jungle-600);color:var(--bone-dim)
+}
+.step.done .dot{background:var(--ok);border-color:var(--ok);color:#10200f}
+.step.now .dot{background:var(--amber);border-color:var(--amber);color:#241a06;box-shadow:0 0 0 5px rgba(232,163,61,.2)}
+.card{
+  display:block;width:100%;text-align:left;margin:0;padding:14px;border-radius:12px;
+  background:linear-gradient(180deg,var(--jungle-700),var(--jungle-800));
+  border:2px solid var(--jungle-600);box-shadow:0 4px 0 rgba(0,0,0,.3);
+  color:var(--bone);font-family:inherit;font-size:15px;letter-spacing:normal;text-transform:none;font-weight:400
+}
+button.card:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.3)}
+.card .row{display:flex;align-items:center;gap:12px}
+.card .ico{font-size:30px;line-height:1;flex:0 0 auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.card .txt{flex:1;min-width:0}
+.card .nm{display:block;font-weight:800;font-size:17px;line-height:1.2}
+.card .zn{display:block;font-size:11.5px;color:var(--bone-dim);letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
+.card .st{flex:0 0 auto;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;border-radius:20px;white-space:nowrap}
+.st.lock{background:rgba(210,75,50,.18);color:#FF9E88;border:1px solid rgba(210,75,50,.45)}
+.st.safe{background:rgba(111,191,115,.16);color:var(--ok);border:1px solid rgba(111,191,115,.45)}
+.st.go{background:rgba(232,163,61,.16);color:var(--amber-bright);border:1px solid rgba(232,163,61,.5)}
+.step.done .card{border-color:rgba(111,191,115,.45)}
+.step.now .card{border-color:var(--amber)}
+.step.now .route{margin:12px 0 0;font-size:15px;line-height:1.55;color:var(--bone)}
+.step.now button{margin-top:12px}
+.step.off .card{opacity:.45}
+.step.lab .card{border-color:var(--crate);background:linear-gradient(180deg,#2a2010,#1d1809)}
+
+/* ---------- énigme ---------- */
+.hint{
+  background:var(--jungle-900);border-left:4px solid var(--amber);
+  border-radius:0 10px 10px 0;padding:16px;margin:16px 0;font-size:16px;line-height:1.65
+}
+.hint b{display:block;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+.codes{display:flex;gap:8px;margin:14px 0}
+.codes div{flex:1;text-align:center;background:var(--jungle-900);border:1px solid var(--jungle-600);border-radius:8px;padding:10px 4px}
+.codes .k{font-size:10px;color:var(--bone-dim);letter-spacing:.12em;text-transform:uppercase}
+.codes .v{font-size:20px;font-weight:800;color:var(--amber-bright);letter-spacing:.1em;margin-top:3px}
+
+/* ---------- découverte ---------- */
+.found{text-align:center;padding:6px 0 4px}
+.found .tag{font-size:11.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ok)}
+.found .big{font-size:64px;line-height:1;margin:14px 0 8px}
+.found .k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--crate)}
+.found h2{font-size:22px;margin:4px 0 0}
+.next{
+  margin-top:16px;padding:14px 16px;border-radius:12px;
+  background:rgba(232,163,61,.08);border:2px dashed var(--amber);font-size:15px;line-height:1.55
+}
+.next b{display:block;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-bright);margin-bottom:4px}
+
+/* ---------- accusation ---------- */
+.suspects{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 0}
+.suspects button{
+  margin:0;padding:14px 8px;background:var(--jungle-900);color:var(--bone);
+  border:2px solid var(--jungle-600);box-shadow:0 3px 0 rgba(0,0,0,.35);
+  font-size:14px;letter-spacing:normal;text-transform:none;font-weight:700;line-height:1.35
+}
+.suspects button span{display:block;font-size:34px;line-height:1.1;margin-bottom:6px}
+.suspects button.no{opacity:.35;text-decoration:line-through}
+
+/* ---------- réveil du T-Rex ---------- */
+button.alarm{background:var(--danger);color:#fff;box-shadow:0 4px 0 #7d2514;margin-top:18px}
+button.alarm:active{box-shadow:0 1px 0 #7d2514}
+.riddle{
+  background:var(--jungle-900);border:2px solid var(--danger);border-radius:12px;
+  padding:18px 16px;margin:0 0 16px;font-size:18px;line-height:1.7;text-align:center;font-style:italic
+}
+.riddle .q{display:block;margin-top:10px;font-style:normal;font-weight:800;color:var(--amber-bright)}
+.trex-head{text-align:center;margin-bottom:14px}
+.trex-head .big{font-size:64px;line-height:1;display:block;animation:shake .5s ease 2}
+.trex-head h2{color:#FF9E88;letter-spacing:.08em;text-transform:uppercase;margin:10px 0 4px}
+.trex-head p{margin:0;color:var(--bone-dim);font-size:14px}
+@keyframes shake{0%,100%{transform:none}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+
+/* ---------- final ---------- */
+.final{text-align:center;padding:36px 20px}
+.final .big{font-size:72px;line-height:1;margin-bottom:14px}
+.final h2{color:var(--ok);font-size:26px;margin:0 0 10px;letter-spacing:.1em;text-transform:uppercase}
+.final p{color:var(--bone-dim);font-size:16px;margin:0 auto;max-width:34ch}
+.final p + p{margin-top:10px}
+.final .go{margin-top:24px;padding:18px;background:rgba(232,163,61,.12);border:2px dashed var(--amber);border-radius:12px;color:var(--amber-bright);font-size:19px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.chrono{margin-top:16px;font-size:13px;color:var(--bone-dim);letter-spacing:.16em;text-transform:uppercase}
+.foot{text-align:center;font-size:11.5px;color:#7E8C78;margin-top:26px;letter-spacing:.16em;text-transform:uppercase}
+
+/* --- petits écrans (iPhone SE, 320px) --- */
+@media (max-width:360px){
+  .wrap{padding:14px 12px 26px}
+  .brand h1{font-size:22px}
+  .brand .logo{font-size:38px}
+  .card{padding:12px}
+  .card .ico{font-size:26px}
+  .card .nm{font-size:15.5px}
+  .card .zn{font-size:10.5px;letter-spacing:.08em}
+  .card .st{font-size:9px;padding:5px 7px;letter-spacing:.05em}
+  .crate{padding:16px}
+  input[type=text]{font-size:21px;padding:14px}
+  button{padding:15px;font-size:15px}
+  .hint,.radio{padding:14px;font-size:15px}
+  .codes .v{font-size:17px}
+  .teambar{padding:9px 11px;font-size:12px}
+}
+/* --- écrans bas (paysage, vieux téléphones) --- */
+@media (max-height:620px){
+  #scr-intro.on{min-height:auto;padding-top:8px}
+  .brand{margin-bottom:14px}
+}
+
+/* ---------- équipes, colère du T-Rex, rotation ---------- */
+.card.team{margin:0 0 12px;border-width:2px}
+.card.team .ico{font-size:34px}
+.rage{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#FF9E88}
+.rage .pips{display:flex;gap:6px}
+.rage i{width:22px;height:10px;border-radius:5px;background:var(--jungle-900);border:1px solid rgba(210,75,50,.5)}
+.rage i.on{background:var(--danger)}
+.wait{margin:14px 0 0;font-size:13.5px;color:var(--bone-dim);text-align:center}
+.proofs.four .n{font-size:9.5px}
+
+/* ---------- chrono d'épreuve ---------- */
+.chrono-box{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--jungle-900);border:2px solid var(--amber);border-radius:12px;
+  padding:12px 16px;margin:0 0 14px;
+  position:sticky;top:8px;z-index:5;box-shadow:0 6px 16px rgba(0,0,0,.45)
+}
+.chrono-box .l{font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--bone-dim)}
+.chrono-box .t{font-size:34px;font-weight:800;letter-spacing:.06em;color:var(--amber-bright);font-variant-numeric:tabular-nums}
+.chrono-box.fini{border-color:var(--danger)}
+.chrono-box.fini .t{color:#FF9E88}
+button.start{font-size:18px;padding:20px}
+
+/* ---------- horloge commune ---------- */
+.clockbar{
+  position:sticky;top:0;z-index:6;margin:-18px -16px 16px;padding:12px 16px;
+  background:var(--jungle-800);border-bottom:2px solid var(--amber);
+  font-size:14px;font-weight:700;text-align:center;color:var(--bone)
+}
+.clockbar b{color:var(--amber-bright);font-size:17px;font-variant-numeric:tabular-nums;margin-left:4px}
+.step.late .dot{background:var(--danger);border-color:var(--danger);color:#fff}
+.step.late .card{border-color:rgba(210,75,50,.6)}
+.step.late .route{margin:12px 0 0;font-size:14px;color:var(--bone-dim)}
+.late{margin:0 0 4px;padding:14px;border-radius:12px;background:rgba(210,75,50,.1);border:2px solid rgba(210,75,50,.5)}
+.late b{display:block;color:#FF9E88;margin-bottom:6px}
+.late p{margin:0 0 12px;font-size:14.5px;color:var(--bone-dim)}
+
+/* ---------- chasse aux lettres ---------- */
+#pz-letters{margin:0 0 16px}
+.letters{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+.letters input{
+  width:100%;aspect-ratio:1;padding:0;font-size:26px;font-weight:800;text-align:center;letter-spacing:0;
+  text-transform:uppercase;background:var(--bone);color:#241a06;
+  border:2px dashed var(--crate);border-radius:10px;outline:none
+}
+.letters input:focus{border-style:solid;border-color:var(--amber)}
+.letters input:disabled{background:var(--ok);color:#10200f;border:2px solid var(--ok);opacity:1}
+
+
+/* ---------- règles ---------- */
+.rules{margin:0;padding:0 0 0 22px}
+.rules li{margin:0 0 8px;padding-left:4px}
+.rules li::marker{color:var(--amber);font-weight:800}
+.rule-win,.rule-lose{margin:12px 0 0;padding:10px 12px;border-radius:8px;font-size:15px;line-height:1.5}
+.rule-win{background:rgba(111,191,115,.12);border:1px solid rgba(111,191,115,.4)}
+.rule-lose{background:rgba(210,75,50,.12);border:1px solid rgba(210,75,50,.4)}
+
+/* ---------- bouton de test ---------- */
+button.reset{
+  display:inline-block;width:auto;margin:6px 4px 0;padding:9px 14px;font-size:11px;letter-spacing:.08em;
+  background:#3a1712;color:#FF9E88;border:1px solid rgba(210,75,50,.6);box-shadow:none
+}
+
+
+.gage{display:none;margin:12px 0;padding:12px 14px;border-radius:10px;background:rgba(247,198,91,.12);border:2px solid var(--amber-bright);font-size:15.5px;line-height:1.5}
+.gage b{display:block;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-bright);margin-bottom:4px}
+
+.stop{margin:0 0 16px;padding:12px 14px;border-radius:10px;background:rgba(210,75,50,.14);border:2px solid var(--danger);color:#FFB9A8;font-size:15px;line-height:1.5}
+.stop strong{color:#fff}
+
+.testbar{text-align:center;margin-top:24px}
+
+.proofs div{flex:1 1 0;min-width:0}
+.proofs .n{overflow-wrap:anywhere;hyphens:auto}
+.proofs.four .n{font-size:8.5px;letter-spacing:.04em}
+
+/* ---------- analyse ADN ---------- */
+.adn,.lab-wait{display:none;margin-top:14px}
+.adn-bar{height:16px;border-radius:8px;background:var(--jungle-900);border:1px solid var(--crate);overflow:hidden}
+.adn-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok),var(--amber-bright))}
+.adn-pct{text-align:center;font-size:34px;font-weight:800;color:var(--amber-bright);margin:10px 0 2px;font-variant-numeric:tabular-nums}
+.adn-step{text-align:center;font-size:14px;color:var(--bone-dim);min-height:1.5em}
+.lab-wait{padding:14px;border-radius:12px;background:rgba(111,191,115,.1);border:2px solid var(--ok)}
+.lab-wait b{display:block;color:var(--ok);font-size:17px;margin-bottom:6px}
+.lab-wait p{margin:0;font-size:15px;line-height:1.55}
+
+/* ---------- révélation ---------- */
+.rv-radar{min-height:calc(100dvh - 60px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px}
+.radar{position:relative;width:230px;height:230px;border-radius:50%;border:2px solid var(--ok);
+  background:repeating-radial-gradient(circle,transparent 0 36px,rgba(111,191,115,.25) 36px 38px);overflow:hidden;box-shadow:0 0 40px rgba(111,191,115,.35)}
+.radar i{position:absolute;inset:0;background:conic-gradient(from 0deg,rgba(111,191,115,.55),transparent 60deg);animation:scan 1.4s linear infinite}
+@keyframes scan{to{transform:rotate(360deg)}}
+.rv-radar-t{font-size:22px;font-weight:800;color:var(--ok);text-align:center;letter-spacing:.04em}
+.reveal .tag{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ok);margin-bottom:14px}
+.reveal .diego{display:block;width:100%;max-width:320px;aspect-ratio:1;object-fit:cover;margin:0 auto 16px;border-radius:16px;border:4px solid var(--amber)}
+.reveal h2{font-size:30px}
+.bilan{text-align:center}
+.bilan .tag{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.bilan h2{margin:8px 0 14px;font-size:22px;color:var(--amber-bright)}
+.stats{display:flex;gap:10px}
+.stats div{flex:1;padding:12px 6px;border-radius:10px;background:var(--jungle-900);border:1px solid var(--jungle-600)}
+.stats b{display:block;font-size:26px;color:var(--bone)}
+.stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--bone-dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ 1. PROLOGUE ============ -->
+<section id="scr-intro" class="screen on">
+  <div class="tape"></div>
+  <div class="brand">
+    <span class="logo">🦕</span>
+    <h1>Le Parc de Diego</h1>
+    <p>Avis de recherche</p>
+  </div>
+  <div class="crate">
+    <div class="msg err show" style="margin:0 0 16px">⚠️ Alerte — le Diegosaurus Rex s'est échappé</div>
+    <div class="radio" id="intro-radio"></div>
+    <div class="dots" id="intro-dots"></div>
+    <button id="btn-intro" onclick="nextIntro()">Suivant</button>
+  </div>
+</section>
+
+<!-- ============ 1b. CHOIX DE L'ÉQUIPE ============ -->
+<section id="scr-team" class="screen">
+  <div class="tape"></div>
+  <h1 class="stencil" style="font-size:21px;color:var(--amber-bright);margin:0 0 4px">Votre équipe</h1>
+  <p style="color:var(--bone-dim);font-size:14px;margin:0 0 16px">Choisissez votre équipe. Chacune suit sa propre piste dans le parc.</p>
+  <div id="teams"></div>
+</section>
+
+<!-- ============ 1c. TOP DÉPART (commun à toutes les équipes) ============ -->
+<section id="scr-top" class="screen">
+  <div class="tape"></div>
+  <div class="crate">
+    <div class="found">
+      <div class="tag" id="top-team"></div>
+      <div class="big">⏱️</div>
+      <h2>Top départ</h2>
+    </div>
+    <div class="radio" id="top-radio" style="margin-top:16px"></div>
+    <button class="start" onclick="topDepart()">🚀 TOP ! Lancer la partie</button>
+    <p class="wait">Les 4 équipes appuient en même temps, au signal d'Ornella.</p>
+  </div>
+  <button class="ghost" onclick="restart()">Changer d'équipe</button>
+</section>
+
+<!-- ============ 2. NOTRE PARCOURS ============ -->
+<section id="scr-map" class="screen">
+  <div class="clockbar" id="clock-map"></div>
+  <div class="teambar">
+    <span id="lbl-team">—</span>
+    <span>Indices : <strong id="lbl-done">0</strong> sur 4</span>
+  </div>
+  <h1 class="stencil" style="font-size:21px;color:var(--amber-bright);margin:0 0 4px">Notre parcours</h1>
+  <div class="proofs" id="proofs"></div>
+  <div class="trail" id="trail"></div>
+  <button class="ghost" onclick="restart()">Recommencer la partie</button>
+  <p class="foot">Votre progression est sauvegardée sur ce téléphone</p>
+</section>
+
+<!-- ============ 3. ÉPREUVE ============ -->
+<section id="scr-puzzle" class="screen">
+  <div class="teambar">
+    <button class="ghost" style="width:auto;margin:0;padding:7px 12px" onclick="showMap()">← Parcours</button>
+    <span>Épreuve <strong id="pz-num">—</strong> sur 4</span>
+  </div>
+  <div class="crate">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <span id="pz-ico" style="font-size:38px"></span>
+      <div>
+        <h2 id="pz-name">—</h2>
+        <div style="font-size:12px;color:var(--bone-dim);letter-spacing:.14em;text-transform:uppercase" id="pz-zone">—</div>
+      </div>
+    </div>
+    <div class="chrono-box" id="pz-chrono"><span class="l" id="pz-chrono-l">Temps restant</span><span class="t" id="pz-time">10:00</span></div>
+    <div class="radio" id="pz-radio"></div>
+    <div class="hint"><b>Les règles</b><div id="pz-hint"></div></div>
+    <div id="msg-chrono" class="msg err"></div>
+    <div class="gage" id="pz-gage"></div>
+    <div id="pz-letters">
+      <label>Les lettres trouvées (dans le désordre)</label>
+      <div class="letters" id="pz-letter-boxes"></div>
+    </div>
+    <div id="pz-code">
+      <label for="inp-code" id="lbl-code">Code de déverrouillage</label>
+      <input id="inp-code" type="text" maxlength="60" placeholder="????" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <button id="btn-code" onclick="submitCode()">Valider le code</button>
+      <div id="msg-puzzle" class="msg"></div>
+    </div>
+    <button class="start" id="pz-win" onclick="duelFini()">🏆 Réussi ! Découvrir l'indice</button>
+    <button class="ghost" id="pz-gagefait" onclick="duelFini(true)">✅ Gage fait : découvrir l'indice</button>
+    <button class="alarm" id="pz-trex" onclick="startRiddles()">🦖 Affronter le Dresseur</button>
+    <button id="pz-seek" onclick="openPuzzle(current, true)">🔍 On l'a trouvé !</button>
+  </div>
+</section>
+
+<!-- ============ 3b. LES ÉNIGMES DU DRESSEUR (en réserve) ============ -->
+<section id="scr-trex" class="screen">
+  <div class="tape"></div>
+  <div class="teambar">
+    <button class="ghost" style="width:auto;margin:0;padding:7px 12px" onclick="openPuzzle(current)">← Retour</button>
+    <span>Énigme <strong id="tx-num">1</strong> sur <span id="tx-tot">3</span></span>
+  </div>
+  <div class="crate" style="border-color:var(--danger)">
+    <div class="trex-head">
+      <span class="big">🦖</span>
+      <h2>Le Dresseur du T-Rex</h2>
+      <p>Répondez juste… sinon le T-Rex se rapproche !</p>
+    </div>
+    <div class="rage" id="tx-rage"></div>
+    <div class="riddle" id="tx-riddle"></div>
+    <label for="inp-trex">Votre réponse</label>
+    <input id="inp-trex" type="text" maxlength="30" placeholder="…" autocomplete="off" spellcheck="false" style="letter-spacing:.08em;font-size:21px">
+    <button onclick="answerTrex()">Répondre au Dresseur</button>
+    <div id="msg-trex" class="msg"></div>
+  </div>
+  <button class="ghost" onclick="skipRiddle()">Passer cette énigme (le T-Rex se rapproche)</button>
+</section>
+
+<!-- ============ 4. DÉCOUVERTE ============ -->
+<section id="scr-found" class="screen">
+  <div class="clockbar" id="clock-found"></div>
+  <div class="crate">
+    <div class="found">
+      <div class="tag" id="fd-tag">✓ Épreuve réussie</div>
+      <div class="big" id="fd-ico"></div>
+      <div class="k" id="fd-k"></div>
+      <h2 id="fd-name"></h2>
+    </div>
+    <div class="radio" id="fd-radio" style="margin-top:16px"></div>
+    <div class="next"><b>Prochaine piste</b><span id="fd-next"></span></div>
+    <p class="wait">⏱️ À la fin du tour, l'écran vous enverra tout seul à la suite.</p>
+    <button onclick="showMap()">Voir notre parcours</button>
+  </div>
+</section>
+
+<!-- ============ 4b. CHANGEMENT D'ÉPREUVE (trajet) ============ -->
+<section id="scr-move" class="screen">
+  <div class="tape"></div>
+  <div class="crate" style="border-color:var(--amber)">
+    <div class="found">
+      <div class="tag" id="mv-tag" style="color:var(--amber-bright)">🔔 Changement d'épreuve !</div>
+      <div class="big" id="mv-ico"></div>
+      <div class="k">Direction</div>
+      <h2 id="mv-name"></h2>
+      <div style="font-size:12px;color:var(--bone-dim);letter-spacing:.14em;text-transform:uppercase;margin-top:4px" id="mv-zone"></div>
+    </div>
+    <div class="chrono-box" id="mv-chrono" style="margin-top:16px"><span class="l" id="mv-chrono-l">Départ de l'épreuve dans</span><span class="t" id="mv-time">1:00</span></div>
+    <p class="stop" id="mv-stop">⛔ Rejoignez l'épreuve, mais <strong>ne commencez pas avant la fin du compte à rebours</strong>. Le téléphone vous dira quand c'est parti !</p>
+    <div class="radio" id="mv-radio"></div>
+
+    <!-- l'équipe n'a pas réussi l'épreuve précédente : bouton « gage fait » (duels) ou mot secret (lettres) -->
+    <div id="mv-late" class="late">
+      <b id="mv-late-t"></b>
+      <p id="mv-late-p"></p>
+      <div class="gage" id="mv-gage"></div>
+      <div id="mv-late-code">
+        <label for="inp-late" id="lbl-late">Le mot secret</label>
+        <input id="inp-late" type="text" maxlength="20" autocapitalize="characters" placeholder="????" autocomplete="off" spellcheck="false">
+        <button onclick="submitLate()">Récupérer l'indice</button>
+      </div>
+      <button id="mv-late-btn" onclick="lateGage()">✅ Gage fait : découvrir l'indice</button>
+      <div id="msg-late" class="msg"></div>
+    </div>
+
+    <button id="mv-go" onclick="goMove()">📖 Lire les règles en attendant</button>
+  </div>
+</section>
+
+<!-- ============ 5. LABO ============ -->
+<section id="scr-lab" class="screen">
+  <div class="tape"></div>
+  <div class="teambar">
+    <button class="ghost" style="width:auto;margin:0;padding:7px 12px" onclick="showMap()">← Parcours</button>
+    <span>Étape <strong>finale</strong></span>
+  </div>
+  <div class="crate lab" style="display:block;border-color:var(--crate);background:linear-gradient(180deg,#2a2010,#1d1809)">
+    <div style="text-align:center;font-size:40px;margin-bottom:8px">🧬</div>
+    <h2 style="text-align:center;margin-bottom:14px">Labo génétique</h2>
+
+    <!-- 5a. identifier le Diegosaurus Rex -->
+    <div id="lab-accuse">
+      <div class="radio" id="lab-intro"></div>
+      <div class="proofs four" id="lab-proofs" style="margin:0"></div>
+      <div class="suspects" id="suspects"></div>
+      <div id="msg-accuse" class="msg"></div>
+    </div>
+
+    <!-- 5b. code maître -->
+    <div id="lab-code" style="display:none">
+      <div class="radio" id="lab-verdict"></div>
+      <button class="start" id="btn-adn" onclick="analyseADN()">🧬 Lancer l'analyse ADN</button>
+      <div id="adn" class="adn">
+        <div class="adn-bar"><i id="adn-fill"></i></div>
+        <div class="adn-pct" id="adn-pct">0 %</div>
+        <div class="adn-step" id="adn-step"></div>
+      </div>
+      <div id="lab-wait" class="lab-wait">
+        <b>✅ Correspondance ADN : 100 %</b>
+        <p>C'est bien lui. Le radar va maintenant localiser le Diegosaurus Rex… <strong>pour toutes les équipes en même temps</strong>. Gardez le téléphone en main et restez devant la maison !</p>
+        <div class="chrono-box" style="margin:14px 0 0;position:static"><span class="l">Révélation dans</span><span class="t" id="lab-time">5:00</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. FINAL ============ -->
+<section id="scr-win" class="screen">
+  <!-- 1. le radar s'emballe -->
+  <div id="rv-radar" class="rv-radar">
+    <div class="radar"><i></i></div>
+    <div class="rv-radar-t" id="rv-radar-t">📡 Radar activé…</div>
+  </div>
+  <!-- 2. la révélation -->
+  <div id="rv-fin">
+    <div class="tape"></div>
+    <div class="crate final reveal">
+      <div class="tag">🦕 Diegosaurus Rex · localisé</div>
+      <img class="diego" src="diego.jpg" alt="Diego" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'big',textContent:'🦕'}))">
+      <h2>C'est Diego !</h2>
+      <p>Le plus rare, le plus mignon et le moins dormeur des dinosaures fête aujourd'hui son <strong style="color:var(--bone)">1er anniversaire</strong>.</p>
+      <div class="go">🎂 Joyeux anniversaire Diego !</div>
+      <p style="margin-top:14px;font-size:14px">Place au gâteau… et attention, le T-Rex n'est jamais loin de lui.</p>
+    </div>
+    <div class="crate bilan">
+      <div class="tag" id="rv-team"></div>
+      <h2 id="rv-titre"></h2>
+      <div class="stats" id="rv-stats"></div>
+      <p class="wait">Ornella annonce maintenant les résultats des 4 équipes !</p>
+    </div>
+    <button class="ghost" onclick="restart()">Recommencer la partie</button>
+  </div>
+</section>
+
+<!-- Bouton de test : redémarrer le jeu (à retirer le jour J : BOUTON_TEST = false) -->
+<div class="testbar" id="testbar">
+  <button class="reset" id="btn-skip" onclick="sauterPhase()">⏩ Fin des 10 min (test)</button>
+  <button class="reset" id="btn-reset" onclick="restart()">🔄 Redémarrer le jeu (test)</button>
+</div>
+
+</div>
+<script>
+/* ============================================================
+   L'HISTOIRE — à ajuster (voir GAME_DESIGN.md)
+   ============================================================ */
+const ORNELLA = "🦕 Ornella · directrice";
+const DRESSEUR = "🦖 Le Dresseur du T-Rex";
+const ALAIN = "🦏 Alain le Tricératops";
+
+const PROLOGUE = [
+  ["Bienvenue au Parc de Diego ! Je suis Ornella, la directrice du parc.",
+   "Il y a un an jour pour jour, notre labo a vu naître une espèce toute nouvelle, la plus rare du parc : le <strong>Diegosaurus Rex</strong> !"],
+  ["Mais cette nuit, une panne a coupé toutes les clôtures… et le Diegosaurus Rex s'est échappé !",
+   "Personne ne l'a revu depuis sa naissance au labo. On ne sait même pas à quoi il ressemble aujourd'hui."],
+  ["Votre mission, rangers : réussir les <strong>4 épreuves du parc</strong>, rassembler les indices qu'il a laissés… et <strong>retrouver le Diegosaurus Rex</strong>.",
+   "Attention : les maîtres du jeu sont redoutables et ne font aucun cadeau. Choisissez votre équipe : votre première piste vous attend !"]
+];
+
+/* Les 4 épreuves. type "code" = l'équipe tape un code trouvé sur place ;
+   type "enigmes" = le téléphone pose les énigmes du Dresseur. */
+const EPREUVES = [
+  { ico:"🦏", nom:"Le défi d'Alain", court:"Pétanque contre Alain", zone:"L'enclos d'Alain le Tricératops", lieu:"le terrain de pétanque", type:"duel", voix:ALAIN, maitre:"Alain",
+    route:"Direction l'enclos d'Alain le Tricératops, sur le terrain de pétanque : Alain vous attend de pied ferme !",
+    arrivee:"Je suis Alain, le Tricératops ! Le Diegosaurus Rex a laissé tomber quelque chose dans mon enclos cette nuit… Vous le voulez ? Alors battez-moi aux boules… si vous en êtes capables : personne ne m'a jamais battu !",
+    indice:{ etapes:[
+        "Alain lance le cochonnet.",
+        "Votre équipe tire <strong>5 boules</strong>.",
+        "Alain tire ensuite <strong>3 boules</strong> pour vous battre.",
+        "La boule la plus proche du cochonnet remporte la manche." ],
+      gagner:"Vous remportez une manche ? Appuyez sur <strong>« 🏆 Réussi ! Découvrir l'indice »</strong>. Une seule victoire suffit… mais Alain est très fort ! S'il gagne, on rejoue une manche.",
+      sinon:"Chrono à zéro sans victoire : l'app vous donne un gage. Une fois le gage fait, appuyez sur <strong>« ✅ Gage fait : découvrir l'indice »</strong>." },
+    preuve:{ ico:"🍼", nom:"Un biberon", court:"Biberon",
+      texte:"Alain vous tend ce que le petit a oublié dans son enclos : un biberon encore tiède, avec des traces de dents sur la tétine. Vide, évidemment. D'après Alain, le Diegosaurus Rex en réclame un toutes les trois heures, en hurlant plus fort qu'un T-Rex… y compris à 4 h du matin. Conclusion : il boit encore du lait, et il sait se faire entendre." } },
+
+  { ico:"🔤", nom:"Le mot secret de la Serre", court:"Chasse aux lettres", zone:"La Serre préhistorique", lieu:"le jardin", code:"ECLORE", type:"lettres", nb:6, voix:ORNELLA,
+    label:"Le mot secret",
+    route:"Direction la Serre préhistorique, dans le jardin : le Diegosaurus Rex y a semé un mot secret, lettre par lettre…",
+    arrivee:"Rangers, cette nuit, le Diegosaurus Rex a semé des lettres partout dans le jardin. Retrouvez-les et devinez le mot secret ! Un indice : c'est ce que font les œufs de dinosaure quand leur heure est venue…",
+    indice:{ etapes:[
+        "<strong>6 lettres</strong> sont cachées dans le jardin.",
+        "Quand vous en trouvez une, <strong>laissez-la à sa place</strong> pour les autres équipes !",
+        "Notez-la dans une des cases ci-dessous.",
+        "Avec les 6 lettres, devinez le mot secret, tapez-le et validez." ],
+      gagner:"Le bon mot débloque l'indice.",
+      sinon:"Chrono à zéro : vous pouvez encore taper le mot pendant le trajet." },
+    finChrono:"⏰ Temps écoulé ! Pas grave : vous pouvez encore deviner le mot avec les lettres trouvées et le taper ici.",
+    preuve:{ ico:"👣", nom:"Une empreinte pointure 21", court:"Pointure 21",
+      texte:"ÉCLORE, bravo ! Et juste à côté de la dernière lettre : une empreinte minuscule dans la terre. Les scientifiques l'ont mesurée : pointure 21. Pas de griffes, pas d'écailles… cinq petits orteils tout ronds. Le Diegosaurus Rex marche depuis peu et, visiblement, il tombe souvent : on retrouve une empreinte de fesses tous les trois pas." } },
+
+  { ico:"🎯", nom:"L'antre du T-Rex", court:"Fléchettes contre le Dresseur", zone:"La forêt du T-Rex", lieu:"la forêt", type:"duel", voix:DRESSEUR, maitre:"le Dresseur",
+    route:"Direction la forêt du T-Rex : le Dresseur s'y cache… à vous de le débusquer !",
+    cherche:{ voix:ORNELLA,
+      texte:"Le Dresseur du T-Rex se cache quelque part dans la forêt. Il n'affronte que ceux qui arrivent à le trouver ! Il est très bien camouflé… Tendez l'oreille : il lui arrive de rugir.",
+      mission:{ etapes:[
+        "Le Dresseur du T-Rex est caché quelque part dans la forêt.",
+        "Fouillez la forêt en équipe, et restez groupés.",
+        "Quand vous l'avez trouvé, appuyez sur <strong>« On l'a trouvé ! »</strong>." ] } },
+
+    arrivee:"Grrr… bien joué, vous m'avez trouvé ! Je suis le Dresseur du T-Rex. Mon T-Rex a vu le Diegosaurus Rex cette nuit… Si vous voulez savoir ce qu'il a trouvé, battez-moi aux fléchettes. Je n'ai jamais raté une cible !",
+    indice:{ etapes:[
+        "Votre équipe lance <strong>5 fléchettes</strong> et additionne ses points.",
+        "Le Dresseur lance ensuite ses <strong>5 fléchettes</strong>.",
+        "Le plus gros total remporte la manche." ],
+      gagner:"Vous remportez une manche ? Appuyez sur <strong>« 🏆 Réussi ! Découvrir l'indice »</strong>. Une seule victoire suffit… mais il est redoutable ! S'il gagne, on rejoue une manche.",
+      sinon:"Chrono à zéro sans victoire : l'app vous donne un gage. Une fois le gage fait, appuyez sur <strong>« ✅ Gage fait : découvrir l'indice »</strong>." },
+    preuve:{ ico:"🌙", nom:"Le rapport secret des parents", court:"Rapport",
+      texte:"Le Dresseur s'incline et vous tend un dossier que son T-Rex a déterré : « Rapport confidentiel des parents du Diegosaurus Rex ». Nuits complètes depuis sa naissance : 0. Réveils par nuit : entre 2 et 11. Heure de réveil préférée : 5 h 47. Cafés bus par les parents : 1 247, et le compteur tourne encore. Berceuse chantée pour l'endormir : toujours la même, environ 3 000 fois. Conclusion du rapport : l'espèce ne dort jamais… mais elle est adorable." } },
+
+  { ico:"🏓", nom:"Le Dino-pong d'Ornella", court:"Pong contre Ornella", zone:"Le QG de la Directrice", lieu:"la table de ping-pong, dans le jardin", type:"duel", voix:ORNELLA, maitre:"Ornella",
+    route:"Direction le QG de la Directrice, à la table de ping-pong du jardin : Ornella vous défie en personne au Dino-pong !",
+    arrivee:"Vous voilà enfin ! Le Diegosaurus Rex a oublié quelque chose dans mon bureau… Je vous le donne si vous me battez au Dino-pong. Mais je vous préviens : je suis la championne du parc !",
+    indice:{ etapes:[
+        "Votre équipe et Ornella lancent <strong>en même temps</strong> dans les verres d'en face.",
+        "Un joueur qui met une balle <strong>sort du jeu</strong> : ses coéquipiers continuent.",
+        "À la fin des 10 minutes, on compte les verres de chaque côté." ],
+      gagner:"Plus de verres qu'Ornella ? Appuyez sur <strong>« 🏆 Réussi ! Découvrir l'indice »</strong>.",
+      sinon:"Moins de verres qu'Ornella : l'app vous donne un gage. Une fois le gage fait, appuyez sur <strong>« ✅ Gage fait : découvrir l'indice »</strong>." },
+    finChrono:"⏰ Fin du match ! Comptez les verres. Plus qu'Ornella ? Appuyez sur « 🏆 Réussi ! Découvrir l'indice ». Sinon… faites votre gage, puis appuyez sur « ✅ Gage fait : découvrir l'indice ».",
+    preuve:{ ico:"📱", nom:"Une télécommande mâchouillée", court:"Télécommande",
+      texte:"Beau joueur, Ornella vous montre ce qu'elle a trouvé sous son bureau : une télécommande entièrement mâchouillée, trempée de bave, avec les touches 4, 7 et « Volume + » arrachées. Le Diegosaurus Rex a une passion dans la vie : tout ce qui n'est pas un jouet. Clés, téléphones, chaussures, câbles… Plus c'est interdit, plus c'est délicieux." } }
+];
+
+const LABO = { ico:"🧬", nom:"Le Labo génétique", court:"Labo génétique", zone:"Le Labo génétique", lieu:"devant la maison",
+  route:"Toutes les épreuves sont terminées ! Toutes les équipes, rendez-vous devant la maison : le labo génétique va identifier le Diegosaurus Rex." };
+
+/* 4 équipes, 4 épreuves : chaque équipe commence ailleurs et tourne dans le même sens.
+   À chaque round, chaque épreuve accueille exactement une équipe. */
+const EQUIPES = [
+  { nom:"Les Volcanosaures", ico:"🌋", couleur:"#E0643F", ordre:[0,1,2,3] },
+  { nom:"Les Aquaraptors",  ico:"🌊", couleur:"#5AA0E6", ordre:[1,2,3,0] },
+  { nom:"Les Jungle-Rex",   ico:"🌿", couleur:"#6FBF73", ordre:[2,3,0,1] },
+  { nom:"Les Ptéro-Éclairs",ico:"⚡", couleur:"#F7C65B", ordre:[3,0,1,2] }
+];
+
+/* Fiches du labo : reconnaître le Diegosaurus Rex grâce aux 4 indices */
+const FICHES = [
+  { ico:"🦖", nom:"Géant · pointure 58 · dort 14 h par jour",       non:"Non : pointure 58, ce n'est pas du 21 ! Et lui dort comme un bébé… enfin, mieux qu'un bébé." },
+  { ico:"🦏", nom:"Grand · 3 cornes · fait ses nuits",              non:"Non : lui fait des nuits complètes, et il ne boit pas au biberon." },
+  { ico:"🥚", nom:"Pointure 21 · biberon · zéro nuit · mâchouille tout", oui:true },
+  { ico:"🦅", nom:"Petit · vole · picore des graines",              non:"Non : il vole, donc pas d'empreintes au sol. Et il n'a jamais mâchouillé une télécommande." }
+];
+const LAB_INTRO = ["Bravo, rangers ! Le labo a 4 fiches d'espèces. <strong>Laquelle est celle du Diegosaurus Rex ?</strong>",
+  "Comparez avec vos quatre indices."];
+const TOP_TXT = (e, duree, trajet) => [
+  "Rangers, préparez-vous ! Quand je dirai <strong>« 3, 2, 1… TOP ! »</strong>, toutes les équipes appuient en même temps sur le bouton.",
+  "Après le TOP, vous avez " + trajet + " pour rejoindre votre première épreuve : <strong>" + e.court + "</strong> (📍 " + (e.lieu || e.zone) + "). <strong>Ne commencez qu'à la fin de ce compte à rebours !</strong>",
+  "Chaque épreuve dure ensuite " + duree + ". À la fin, l'écran vous envoie tout seul à la suivante."];
+const VERDICT = "Identification réussie ! Pointure 21, un biberon toutes les trois heures, zéro nuit complète et une passion pour les télécommandes : c'est bien le Diegosaurus Rex. Lancez l'analyse ADN pour le confirmer !";
+
+/* En réserve pour plus tard : une épreuve avec type:"enigmes" et nb:3 utilise ces énigmes.
+   Énigmes façon Père Fouras : "ok" liste les réponses acceptées
+   (sans accents ni article), "aide" s'affiche après 2 erreurs */
+const ENIGMES = [
+  { txt:"Je suis dur dehors, tout mou à l'intérieur,<br>Une maman me couve et me garde au chaud.<br>Un beau matin je craque, et il en sort un bébé dino.",
+    ok:["oeuf","oeufs"], aide:"On en trouve dans les nids… et au petit-déjeuner." },
+  { txt:"Plus je brille, plus je rapetisse,<br>Sur le gâteau je fais mon office.<br>On me souffle en faisant un vœu,<br>Et Diego n'en a qu'une, ce qui est déjà mieux.",
+    ok:["bougie","bougies"], aide:"Il y en aura une sur le gâteau de Diego." },
+  { txt:"Je te suis partout quand le soleil brille,<br>Je fais tout comme toi, mais je suis toute noire.<br>La nuit venue, je disparais sans rien dire.",
+    ok:["ombre","son ombre","mon ombre"], aide:"Regardez par terre, à côté de vos pieds." },
+  { txt:"J'ai dormi sous la terre des millions d'années,<br>Un savant m'a brossé avec un petit pinceau.<br>Autrefois j'étais dino, maintenant je suis au musée.",
+    ok:["fossile","fossiles","os","squelette"], aide:"C'est ce qui reste d'un dinosaure, très très longtemps après." },
+  { txt:"J'ai une bouche mais je ne mange pas,<br>Quand je me fâche je crache du feu,<br>Au temps des dinos, j'étais partout là-bas.",
+    ok:["volcan","volcans"], aide:"C'est une montagne qui gronde." },
+  { txt:"Je reviens une seule fois par an,<br>Toujours à la même date pour toi.<br>On chante, on souffle, on ouvre des paquets…<br>Aujourd'hui c'est celui de Diego !",
+    ok:["anniversaire","anniv"], aide:"C'est pour ça que vous êtes tous là aujourd'hui !" },
+  { txt:"J'ai des bras mais pas de mains,<br>Une robe d'écorce et des cheveux verts.<br>Je ne marche jamais, pourtant je grandis,<br>Et la forêt en est remplie.",
+    ok:["arbre","arbres"], aide:"Il y en a plein autour de vous." },
+  { txt:"On me laisse derrière soi sans jamais me perdre,<br>Plus le dino est gros, plus je suis grande.<br>Dans la boue ou le sable, je dis où il est passé.",
+    ok:["empreinte","empreintes","trace","traces","trace de pas","pas"], aide:"Le Diegosaurus Rex en laisse des toutes petites…" },
+  { txt:"Je suis blanc et tout doux, je fais grandir les petits,<br>Le Diegosaurus Rex en boit matin et midi.<br>On me verse dans un biberon.",
+    ok:["lait"], aide:"Ça se boit, c'est blanc, ça fait grandir." }
+];
+
+/* Le gage : donné par l'app quand une équipe perd un duel (chrono à zéro).
+   Pour varier, ajouter d'autres gages dans la liste : l'app en tirera un au hasard. */
+const GAGES = [
+  "La marche du T-Rex : tout le monde fait un tour complet du terrain, coudes collés au corps et mains en petites pinces."
+];
+
+/* ============================================================
+   ÉTAT — sauvegardé localement (résiste à une coupure réseau)
+   equipe = index dans EQUIPES ; ok = épreuves réussies ; top = heure du top départ
+   ============================================================ */
+const KEY = "parc-diego:partie";
+const BOUTON_TEST = true;   // affiche les boutons de test (sauter le temps, redémarrer) sur tous les écrans
+
+/* Horloge commune : toutes les équipes appuient sur TOP en même temps,
+   puis chaque téléphone calcule seul le tour en cours.
+   Un tour = TRAJET (se rendre à l'épreuve) + DUREE (jouer).
+   Ajouter ?test à l'adresse pour une partie accélérée (tours de 40 s). */
+const TEST = /[?&]test/.test(location.search);
+const DUREE  = TEST ? 40 : 10 * 60;   // durée d'une épreuve, en secondes
+const TRAJET = TEST ? 15 :  1 * 60;   // temps pour changer d'épreuve, en secondes
+const TOURS  = 4;
+const FINAL  = TEST ? 30 : 5 * 60;    // temps au labo avant la révélation commune, en secondes
+
+let state = null, current = null, introPage = 0, lastKey = null;
+
+function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch(e){ return null; } }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
+  document.getElementById(id).classList.add("on");
+  window.scrollTo(0,0);
+  majBoutonTest();
+}
+function flash(el, txt, ok, reste){
+  el.textContent = txt;
+  el.className = "msg show " + (ok ? "ok" : "err");
+  clearTimeout(el._t);
+  if(!ok && !reste) el._t = setTimeout(() => el.classList.remove("show"), 3500);
+}
+const clean = v => v.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Z0-9]/g,"");
+const radio = (lignes, voix) => '<div class="who">' + (voix || ORNELLA) + '</div>' + lignes.map(l => "<p>" + l + "</p>").join("");
+const ordre = () => EQUIPES[state.equipe].ordre;          // indices d'épreuves, dans l'ordre de l'équipe
+const etapeDe = i => ordre().indexOf(i);                    // position (0-3) d'une épreuve dans la piste
+const reussi = i => !!(state.ok && state.ok[i]);
+const nbFaits = () => Object.keys(state.ok || {}).length;
+/* Règles d'une épreuve : étapes numérotées, puis comment gagner et quoi faire à la fin du chrono */
+function regles(r){
+  if(typeof r === "string") return "<p>" + r + "</p>";
+  return '<ol class="rules">' + r.etapes.map(x => "<li>" + x + "</li>").join("") + "</ol>" +
+    (r.gagner ? '<p class="rule-win">🏆 ' + r.gagner + "</p>" : "") +
+    (r.sinon ? '<p class="rule-lose">⏰ ' + r.sinon + "</p>" : "");
+}
+const ou = e => e.zone + (e.lieu ? " · 📍 " + e.lieu : "");   // nom de l'épreuve + lieu réel
+const duree = sec => sec >= 60 ? Math.round(sec / 60) + " minute" + (sec >= 120 ? "s" : "") : sec + " secondes";
+const mmss = sec => Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
+
+function proofsHTML(){
+  return ordre().map((i,pos) => {
+    const p = EPREUVES[i].preuve;
+    return reussi(i)
+      ? '<div class="got"><span class="e">' + p.ico + '</span><span class="n">' + p.court + '</span></div>'
+      : '<div><span class="e">?</span><span class="n">Indice ' + (pos+1) + '</span></div>';
+  }).join("");
+}
+
+/* ============================================================
+   HORLOGE COMMUNE
+   phase "trajet" : on se rend à l'épreuve du tour r
+   phase "epreuve" : on joue l'épreuve du tour r
+   phase "labo" : tous les tours sont finis
+   ============================================================ */
+function horloge(){
+  if(!state || !state.top) return null;
+  const t = Math.max(0, Math.floor((Date.now() - state.top) / 1000));
+  const cycle = TRAJET + DUREE, r = Math.floor(t / cycle);
+  if(r >= TOURS){
+    const l = t - TOURS * cycle;
+    return l < FINAL
+      ? { phase:"labo", r:TOURS, reste: FINAL - l, key:"labo" }
+      : { phase:"revelation", r:TOURS, reste:0, key:"revelation" };
+  }
+  const w = t - r * cycle;
+  return w < TRAJET
+    ? { phase:"trajet",  r, reste: TRAJET - w, key:"t" + r }
+    : { phase:"epreuve", r, reste: cycle - w,  key:"e" + r };
+}
+function clockText(h){
+  if(h.phase === "revelation") return "🦕 Le Diegosaurus Rex est localisé !";
+  if(h.phase === "labo") return "🧬 Tous devant la maison · révélation dans <b>" + mmss(h.reste) + "</b>";
+  const e = EPREUVES[ordre()[h.r]];
+  return h.phase === "trajet"
+    ? "🚶 Trajet vers " + e.court + " · <b>" + mmss(h.reste) + "</b>"
+    : "Tour " + (h.r + 1) + "/" + TOURS + " · " + e.court + " · <b>" + mmss(h.reste) + "</b>";
+}
+
+/* Vibration au changement de phase (pas de son) */
+function alerte(){
+  try { navigator.vibrate && navigator.vibrate([300,150,300,150,600]); } catch(e){}
+}
+/* Garder l'écran allumé pendant la partie (si le téléphone le permet) */
+let verrou = null;
+async function garderEcran(){
+  try { if(navigator.wakeLock && !verrou) verrou = await navigator.wakeLock.request("screen"); verrou && verrou.addEventListener("release", () => verrou = null); } catch(e){}
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && state && state.top && !state.fin) garderEcran(); });
+
+/* Aller sur l'écran qui correspond au moment de la partie */
+function allerPhase(h){
+  if(h.phase === "revelation") return openReveal(true);
+  if(h.phase === "epreuve"){
+    openPuzzle(ordre()[h.r]);
+    return flash(document.getElementById("msg-chrono"), "🟢 C'est parti ! L'épreuve commence maintenant.", true);
+  }
+  openMove();
+}
+/* Test : avancer l'horloge jusqu'à la fin de la phase en cours */
+function sauterPhase(){
+  const h = horloge();
+  if(!h || h.phase === "revelation") return;
+  state.top -= h.reste * 1000; save();
+  tick();
+}
+function majBoutonTest(){
+  const skip = document.getElementById("btn-skip"), h0 = horloge();
+  skip.style.display = h0 && h0.phase !== "revelation" && !state.fin ? "inline-block" : "none";
+  if(h0) skip.textContent = h0.phase === "labo" ? "⏩ Aller à la révélation (test)"
+    : h0.phase === "trajet" ? "⏩ Fin de la minute (test)" : "⏩ Fin des " + duree(DUREE) + " (test)";
+}
+function tick(){
+  majBoutonTest();
+  if(!state || !state.top || state.fin) return;
+  const h = horloge();
+  if(h.phase === "revelation" && lastKey === null){ lastKey = h.key; return openReveal(false); }
+  ["clock-map","clock-found"].forEach(id => document.getElementById(id).innerHTML = clockText(h));
+
+  // chrono de l'écran d'épreuve
+  if(current !== null && document.getElementById("scr-puzzle").classList.contains("on")){
+    const pos = etapeDe(current), box = document.getElementById("pz-chrono");
+    const avant = h.phase === "trajet" && h.r === pos, pendant = h.phase === "epreuve" && h.r === pos;
+    box.style.display = avant || pendant ? "flex" : "none";
+    document.getElementById("pz-chrono-l").textContent = avant ? "Départ dans" : "Temps restant";
+    document.getElementById("pz-time").textContent = mmss(h.reste);
+  }
+  // compte à rebours du trajet
+  document.getElementById("mv-time").textContent = mmss(h.phase === "trajet" || h.phase === "labo" ? h.reste : 0);
+  document.getElementById("lab-time").textContent = mmss(h.phase === "labo" ? h.reste : 0);
+
+  if(h.key !== lastKey){
+    const premier = lastKey === null;
+    lastKey = h.key;
+    if(!premier){ alerte(); allerPhase(h); }
+  }
+}
+setInterval(tick, 1000);
+
+/* ============================================================
+   PROLOGUE, CHOIX DE L'ÉQUIPE, TOP DÉPART
+   ============================================================ */
+function renderIntro(){
+  document.getElementById("intro-radio").innerHTML = radio(PROLOGUE[introPage]);
+  document.getElementById("intro-dots").innerHTML = PROLOGUE.map((_,i) => '<i class="' + (i === introPage ? "on" : "") + '"></i>').join("");
+  document.getElementById("btn-intro").textContent = introPage === PROLOGUE.length - 1 ? "Accepter la mission" : "Suivant";
+}
+function nextIntro(){
+  if(introPage < PROLOGUE.length - 1){ introPage++; return renderIntro(); }
+  const box = document.getElementById("teams");
+  box.innerHTML = "";
+  EQUIPES.forEach((t,k) => {
+    const b = document.createElement("button");
+    b.className = "card team";
+    b.style.borderColor = t.couleur;
+    const e = EPREUVES[t.ordre[0]];
+    b.innerHTML = '<span class="row"><span class="ico">' + t.ico + '</span><span class="txt"><span class="nm">' + t.nom +
+      '</span><span class="zn">Départ : ' + e.court + ' · 📍 ' + (e.lieu || e.zone) + '</span></span></span>';
+    b.onclick = () => chooseTeam(k);
+    box.appendChild(b);
+  });
+  show("scr-team");
+}
+function chooseTeam(k){
+  state = { equipe: k, ok: {}, identifie: false, top: null, fin: null };
+  save();
+  showTop();
+}
+function showTop(){
+  const t = EQUIPES[state.equipe], e = EPREUVES[t.ordre[0]];
+  document.getElementById("top-team").innerHTML = t.ico + ' <span style="color:' + t.couleur + '">' + t.nom + '</span>';
+  document.getElementById("top-radio").innerHTML = radio(TOP_TXT(e, duree(DUREE), duree(TRAJET)));
+  show("scr-top");
+}
+function topDepart(){
+  garderEcran();
+  state.top = Date.now(); save();
+  lastKey = horloge().key;
+  openMove();
+}
+function restart(){
+  if(!confirm("Recommencer la partie depuis le début ?")) return;
+  try { localStorage.removeItem(KEY); } catch(e){}
+  state = null; introPage = 0; lastKey = null; current = null;
+  renderIntro();
+  show("scr-intro");
+}
+
+/* ============================================================
+   NOTRE PARCOURS (la piste de l'équipe, calée sur l'horloge)
+   ============================================================ */
+function showMap(){
+  const t = EQUIPES[state.equipe], h = horloge();
+  document.getElementById("lbl-team").innerHTML = t.ico + ' <strong style="color:' + t.couleur + '">' + t.nom + '</strong>';
+  document.getElementById("lbl-done").textContent = nbFaits();
+  document.getElementById("proofs").innerHTML = proofsHTML();
+  document.getElementById("clock-map").innerHTML = clockText(h);
+
+  const box = document.getElementById("trail");
+  box.innerHTML = "";
+  ordre().map(i => EPREUVES[i]).concat([LABO]).forEach((e,pos) => {
+    const lab = e === LABO, idx = EPREUVES.indexOf(e);
+    let etat;
+    if(lab) etat = h.phase === "labo" ? "now" : "off";
+    else if(reussi(idx)) etat = "done";
+    else if(pos === h.r) etat = "now";
+    else if(pos < h.r) etat = "late";
+    else etat = "off";
+
+    const step = document.createElement("div");
+    step.className = "step " + etat + (lab ? " lab" : "");
+    const dot = '<span class="dot">' + (etat === "done" ? "✓" : pos+1) + '</span>';
+    const nom = etat === "off" ? "???" : e.court;
+    const zone = etat === "off" ? "Piste encore inconnue" : ou(e);
+    const badge = etat === "done" ? '<span class="st safe">' + e.preuve.ico + ' Trouvé</span>'
+                : etat === "now"  ? '<span class="st go">' + (h.phase === "trajet" ? "Prochaine" : "En cours") + '</span>'
+                : etat === "late" ? '<span class="st lock">Indice manquant</span>'
+                :                   '<span class="st lock">🔒</span>';
+    const row = '<span class="row"><span class="ico">' + (etat === "off" ? "❔" : e.ico) + '</span>' +
+                '<span class="txt"><span class="nm">' + nom + '</span><span class="zn">' + zone + '</span></span>' + badge + '</span>';
+    if(etat === "now" && lab){
+      step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + e.route + '</p>' +
+        '<button onclick="openLab()">Nous sommes au labo →</button></div>';
+    } else if(etat === "now"){
+      step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + e.route + '</p>' +
+        '<button onclick="openPuzzle(' + idx + ')">' + (h.phase === "trajet" ? "Nous y sommes →" : "Ouvrir l'épreuve →") + '</button></div>';
+    } else if(etat === "late"){
+      const lettres = e.type === "lettres";
+      step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + (lettres ? "Devinez le mot avec les lettres trouvées et tapez-le pour récupérer l\'indice." : "🎲 Gage : " + gageDe(idx) + " Une fois fait, récupérez votre indice.") + '</p>' +
+        '<button onclick="openPuzzle(' + idx + ')">' + (lettres ? "Taper le mot →" : "Gage fait : découvrir l'indice →") + '</button></div>';
+    } else if(etat === "done"){
+      step.innerHTML = dot + '<button class="card" onclick="openFound(' + idx + ')">' + row + '</button>';
+    } else {
+      step.innerHTML = dot + '<div class="card">' + row + '</div>';
+    }
+    box.appendChild(step);
+  });
+  show("scr-map");
+}
+
+/* ============================================================
+   ÉPREUVE
+   ============================================================ */
+function openPuzzle(i, trouve){
+  current = i;
+  const e = EPREUVES[i], h = horloge(), pos = etapeDe(i);
+  const pendant = h.phase === "epreuve" && h.r === pos;      // l'épreuve est en cours
+  const retard = !reussi(i) && (pos < h.r || h.phase === "labo"); // tour passé sans indice
+  const cherche = e.cherche && !trouve && pendant;             // phase 1 : trouver le maître du jeu caché
+  const enigmes = e.type === "enigmes";
+
+  document.getElementById("pz-num").textContent = pos + 1;
+  document.getElementById("pz-ico").textContent = e.ico;
+  document.getElementById("pz-name").textContent = e.nom;
+  document.getElementById("pz-zone").textContent = ou(e);
+  document.getElementById("pz-radio").innerHTML = cherche ? radio([e.cherche.texte], e.cherche.voix) : radio([e.arrivee], e.voix);
+  document.getElementById("pz-hint").innerHTML = regles(cherche ? e.cherche.mission : e.indice);
+  document.getElementById("lbl-code").textContent = e.label || "Code de déverrouillage";
+
+  const jouable = !reussi(i) && ((pendant && !cherche) || retard);
+  document.getElementById("pz-seek").style.display = cherche && !reussi(i) ? "block" : "none";
+  const duel = e.type === "duel";
+  document.getElementById("pz-code").style.display = jouable && !duel && !(enigmes && !retard) ? "block" : "none";
+  document.getElementById("pz-win").style.display = jouable && duel ? "block" : "none";
+  document.getElementById("pz-gagefait").style.display = jouable && duel && retard ? "block" : "none";
+  document.getElementById("pz-letters").style.display = e.type === "lettres" && (jouable || reussi(i)) ? "block" : "none";
+  if(e.type === "lettres") renderLetters(i, reussi(i));
+  document.getElementById("btn-code").textContent = e.type === "lettres" ? "Valider" : "Valider le code";
+  document.getElementById("pz-trex").style.display = jouable && enigmes && !retard ? "block" : "none";
+
+  const m = document.getElementById("msg-chrono");
+  m.classList.remove("show");
+  if(reussi(i)) flash(m, "✓ Épreuve déjà réussie !", true);
+  else if(retard) flash(m, finTexte(i), false, true);
+  else if(h.phase === "trajet" && h.r === pos) flash(m, "⛔ Ne commencez pas encore ! L'épreuve démarre à la fin du compte à rebours. Lisez les règles en attendant.", false, true);
+  montrerGage(document.getElementById("pz-gage"), retard ? i : null);
+
+  const inp = document.getElementById("inp-code");
+  const code = e.code || "";
+  inp.setAttribute("inputmode", /^[0-9]+$/.test(code) ? "numeric" : "text");
+  inp.setAttribute("placeholder", "?".repeat(code.length));
+  inp.value = "";
+  document.getElementById("msg-puzzle").classList.remove("show");
+  show("scr-puzzle");
+  tick();
+}
+function submitCode(){
+  const m = document.getElementById("msg-puzzle");
+  const v = clean(document.getElementById("inp-code").value);
+  if(!v) return flash(m, EPREUVES[current].type === "lettres" ? "Tapez le mot secret." : "Tapez le code.");
+  if(v !== clean(EPREUVES[current].code)) return flash(m, EPREUVES[current].type === "lettres" ? "Ce n'est pas le bon mot. Essayez encore !" : "Ce code ne fonctionne pas. Essayez encore !");
+  flash(m, "✓ Épreuve réussie !", true);
+  win(current);
+}
+/* Duel : l'équipe déclare sa victoire (ou son gage fait) — sur l'honneur */
+function duelFini(gage){
+  const e = EPREUVES[current];
+  if(!confirm(gage ? "Le gage est bien fait ?" : "Vous avez vraiment battu " + e.maitre + " ?")) return;
+  flash(document.getElementById("msg-chrono"), gage ? "✓ Gage accompli !" : "🏆 Bravo, vous avez battu " + e.maitre + " !", true);
+  win(current);
+}
+function win(i){
+  if(!reussi(i)){
+    const h = horloge();
+    state.ok = state.ok || {};
+    state.temps = state.temps || {};
+    if(h.phase === "epreuve" && h.r === etapeDe(i)) state.temps[i] = DUREE - h.reste;
+    state.ok[i] = true; save();
+  }
+  setTimeout(() => openFound(i), 900);
+}
+
+/* Un gage par épreuve ratée, tiré au hasard une seule fois (il ne change pas au rechargement) */
+function finTexte(i){
+  const e = EPREUVES[i];
+  return e.finChrono || "⏰ Temps écoulé ! Vous avez battu " + e.maitre + " juste à temps ? Appuyez sur « 🏆 Réussi ! Découvrir l'indice ». Sinon, faites votre gage puis appuyez sur « ✅ Gage fait : découvrir l'indice ».";
+}
+/* Affiche le gage de l'épreuve i dans l'encadré el (rien pour la chasse aux lettres) */
+function montrerGage(el, i){
+  const g = i === null ? "" : gageDe(i);
+  el.innerHTML = g ? "<b>🎲 Votre gage</b>" + g : "";
+  el.style.display = g ? "block" : "none";
+}
+function gageDe(i){
+  const e = EPREUVES[i];
+  if(!e.maitre) return "";
+  state.gages = state.gages || {};
+  if(state.gages[i] === undefined){
+    const pris = Object.values(state.gages);
+    let libres = GAGES.map((_,k) => k).filter(k => !pris.includes(k));
+    if(!libres.length) libres = GAGES.map((_,k) => k);   // plus de gages que de défaites : on en réutilise
+    state.gages[i] = libres[Math.floor(Math.random() * libres.length)];
+    save();
+  }
+  return GAGES[state.gages[i]].replace(/\{maitre\}/g, e.maitre);
+}
+
+/* ============================================================
+   CHASSE AUX LETTRES : cases pour noter les lettres trouvées
+   ============================================================ */
+function renderLetters(i, fini){
+  const box = document.getElementById("pz-letter-boxes"), n = EPREUVES[i].nb;
+  state.lettres = state.lettres || {};
+  const notes = state.lettres[i] || [];
+  box.innerHTML = "";
+  for(let k = 0; k < n; k++){
+    const c = document.createElement("input");
+    c.type = "text"; c.maxLength = 1; c.autocomplete = "off"; c.spellcheck = false;
+    c.setAttribute("autocapitalize", "characters");
+    c.value = fini ? clean(EPREUVES[i].code)[k] : (notes[k] || "");
+    c.disabled = !!fini;
+    c.oninput = () => {
+      c.value = c.value.toUpperCase().slice(-1);
+      state.lettres[i] = [...box.querySelectorAll("input")].map(x => x.value);
+      save();
+      if(c.value && c.nextElementSibling) c.nextElementSibling.focus();
+    };
+    box.appendChild(c);
+  }
+}
+
+/* ============================================================
+   CHANGEMENT D'ÉPREUVE (trajet) + rattrapage de l'indice manqué
+   ============================================================ */
+let lateIdx = null;
+function openMove(){
+  const h = horloge(), labo = h.phase === "labo";
+  const dest = labo ? LABO : EPREUVES[ordre()[h.r]];
+  document.getElementById("mv-tag").textContent = labo ? "🧬 Toutes les épreuves sont finies !" : h.r === 0 ? "🚀 C'est parti !" : "🔔 Changement d'épreuve !";
+  document.getElementById("mv-ico").textContent = dest.ico;
+  document.getElementById("mv-name").textContent = dest.nom;
+  document.getElementById("mv-zone").textContent = ou(dest);
+  document.getElementById("mv-radio").innerHTML = radio([dest.route]);
+  document.getElementById("mv-chrono").style.display = "flex";
+  document.getElementById("mv-chrono-l").textContent = labo ? "Révélation commune dans" : "Départ de l'épreuve dans";
+  document.getElementById("mv-stop").style.display = labo ? "none" : "block";
+
+  // épreuve précédente pas réussie ? On peut encore récupérer l'indice ici
+  const prevPos = labo ? TOURS - 1 : h.r - 1;
+  lateIdx = prevPos >= 0 && !reussi(ordre()[prevPos]) ? ordre()[prevPos] : null;
+  const late = document.getElementById("mv-late");
+  late.style.display = lateIdx === null ? "none" : "block";
+  if(lateIdx !== null){
+    const p = EPREUVES[lateIdx];
+    document.getElementById("mv-late-t").textContent = "Pas encore d'indice pour « " + p.court + " » ?";
+    document.getElementById("mv-late-p").textContent = finTexte(lateIdx);
+    montrerGage(document.getElementById("mv-gage"), lateIdx);
+    document.getElementById("lbl-late").textContent = p.label || "Code";
+    document.getElementById("inp-late").value = "";
+    const duel = p.type === "duel";
+    document.getElementById("mv-late-code").style.display = duel ? "none" : "block";
+    document.getElementById("mv-late-btn").style.display = duel ? "block" : "none";
+    const il = document.getElementById("inp-late"), code = p.code || "";
+    il.setAttribute("inputmode", /^[0-9]+$/.test(code) ? "numeric" : "text");
+    il.setAttribute("placeholder", "?".repeat(code.length));
+    document.getElementById("msg-late").classList.remove("show");
+  }
+  document.getElementById("mv-go").textContent = labo ? "Nous sommes au labo →" : "📖 Lire les règles en attendant";
+  show("scr-move");
+  tick();
+}
+function goMove(){ const h = horloge(); h.phase === "labo" ? openLab() : openPuzzle(ordre()[h.r]); }
+function lateGage(){
+  if(!confirm("Le gage est bien fait ?")) return;
+  state.ok[lateIdx] = true; save();
+  flash(document.getElementById("msg-late"), "✓ Gage accompli !", true);
+  setTimeout(() => openFound(lateIdx), 700);
+}
+function submitLate(){
+  const m = document.getElementById("msg-late");
+  const v = clean(document.getElementById("inp-late").value);
+  if(!v) return flash(m, "Tapez le mot secret.");
+  if(v !== clean(EPREUVES[lateIdx].code)) return flash(m, "Ce n'est pas le bon mot.");
+  state.ok[lateIdx] = true; save();
+  flash(m, "✓ Indice récupéré !", true);
+  setTimeout(() => openFound(lateIdx), 700);
+}
+
+/* ============================================================
+   DÉCOUVERTE (indice + prochaine piste)
+   ============================================================ */
+function openFound(i){
+  const e = EPREUVES[i], pos = etapeDe(i);
+  const suivante = pos + 1 < ordre().length ? EPREUVES[ordre()[pos + 1]] : LABO;
+  const t = state.temps && state.temps[i];
+  document.getElementById("fd-tag").textContent = "✓ " + e.court + " : réussi";
+  document.getElementById("fd-ico").textContent = e.preuve.ico;
+  document.getElementById("fd-k").textContent = "Indice n°" + (pos + 1) + (t ? " · réussi en " + mmss(t) : "");
+  document.getElementById("fd-name").textContent = e.preuve.nom;
+  document.getElementById("fd-radio").innerHTML = radio([e.preuve.texte], e.voix);
+  document.getElementById("fd-next").textContent = suivante.route;
+  document.getElementById("clock-found").innerHTML = clockText(horloge());
+  show("scr-found");
+}
+
+/* ============================================================
+   LABO : identifier le Diegosaurus Rex, puis radar (code maître)
+   ============================================================ */
+function openLab(){
+  if(!["labo","revelation"].includes(horloge().phase)) return showMap();
+  if(nbFaits() < EPREUVES.length) return showMap();   // indices manquants : le parcours indique lesquels
+  document.getElementById("lab-intro").innerHTML = radio(LAB_INTRO);
+  document.getElementById("lab-proofs").innerHTML = proofsHTML();
+  const box = document.getElementById("suspects");
+  box.innerHTML = "";
+  FICHES.forEach(s => {
+    const b = document.createElement("button");
+    b.innerHTML = "<span>" + s.ico + "</span>" + s.nom;
+    b.onclick = () => accuse(s, b);
+    box.appendChild(b);
+  });
+  document.getElementById("msg-accuse").classList.remove("show");
+  document.getElementById("lab-verdict").innerHTML = radio([VERDICT]);
+  labStep(state.identifie);
+  document.getElementById("btn-adn").style.display = "block";
+  document.getElementById("adn").style.display = "none";
+  document.getElementById("lab-wait").style.display = "none";
+  if(state.adn) afficherAttente();
+  show("scr-lab");
+}
+function labStep(trouve){
+  document.getElementById("lab-accuse").style.display = trouve ? "none" : "block";
+  document.getElementById("lab-code").style.display = trouve ? "block" : "none";
+}
+function accuse(s, b){
+  const m = document.getElementById("msg-accuse");
+  if(!s.oui){ b.classList.add("no"); return flash(m, s.non); }
+  state.identifie = true; save();
+  labStep(true);
+  window.scrollTo(0,0);
+}
+/* Analyse ADN : une petite animation, puis on attend la révélation commune */
+const ETAPES_ADN = [
+  "Extraction de l'ADN du biberon…",
+  "Mesure de l'empreinte : pointure 21…",
+  "Décodage du rapport secret des parents…",
+  "Analyse de la bave sur la télécommande…",
+  "Comparaison avec la base du parc…"
+];
+function afficherAttente(){
+  document.getElementById("btn-adn").style.display = "none";
+  document.getElementById("adn").style.display = "none";
+  document.getElementById("lab-wait").style.display = "block";
+}
+function analyseADN(){
+  document.getElementById("btn-adn").style.display = "none";
+  document.getElementById("adn").style.display = "block";
+  const fill = document.getElementById("adn-fill"), pct = document.getElementById("adn-pct"), step = document.getElementById("adn-step");
+  const total = 7000, t0 = Date.now();
+  const anim = setInterval(() => {
+    const x = Math.min(1, (Date.now() - t0) / total);
+    fill.style.width = (x * 100) + "%";
+    pct.textContent = Math.floor(x * 100) + " %";
+    step.textContent = ETAPES_ADN[Math.min(ETAPES_ADN.length - 1, Math.floor(x * ETAPES_ADN.length))];
+    if(x >= 1){
+      clearInterval(anim);
+      state.adn = true; save();
+      afficherAttente();
+    }
+  }, 80);
+}
+
+/* ============================================================
+   LA GRANDE RÉVÉLATION — sur les 4 téléphones en même temps
+   ============================================================ */
+const RADAR = [
+  "📡 Radar activé…",
+  "📡 Signal détecté !",
+  "📡 Distance : 50 mètres…",
+  "📡 Distance : 10 mètres…",
+  "📡 Distance : 2 mètres…",
+  "📡 IL EST JUSTE LÀ !"
+];
+function bilan(){
+  const gagnes = EPREUVES.filter((e,i) => state.ok && state.ok[i] && !(state.gages && state.gages[i] !== undefined)).length;
+  const gages = Object.keys(state.gages || {}).length;
+  const titre = gagnes === 4 ? "🥇 Rangers d'élite"
+              : gagnes === 3 ? "🥈 Rangers confirmés"
+              : gagnes === 2 ? "🥉 Rangers en formation"
+              :                "🦖 Stagiaires du T-Rex";
+  const t = EQUIPES[state.equipe];
+  document.getElementById("rv-team").innerHTML = t.ico + ' <span style="color:' + t.couleur + '">' + t.nom + '</span>';
+  document.getElementById("rv-titre").textContent = titre;
+  document.getElementById("rv-stats").innerHTML =
+    "<div><b>" + gagnes + "/4</b><span>épreuves gagnées</span></div>" +
+    "<div><b>" + gages + "</b><span>gage" + (gages > 1 ? "s" : "") + " fait" + (gages > 1 ? "s" : "") + "</span></div>";
+}
+function openReveal(anime){
+  state.fin = state.fin || Date.now(); save();
+  bilan();
+  const radar = document.getElementById("rv-radar"), fin = document.getElementById("rv-fin");
+  show("scr-win");
+  if(!anime){ radar.style.display = "none"; fin.style.display = "block"; return; }
+  radar.style.display = "flex"; fin.style.display = "none";
+  const txt = document.getElementById("rv-radar-t");
+  RADAR.forEach((l,k) => setTimeout(() => { txt.textContent = l; alerte(); }, k * 1400));
+  setTimeout(() => { radar.style.display = "none"; fin.style.display = "block"; alerte(); }, RADAR.length * 1400 + 400);
+}
+function showWin(){ openReveal(false); }
+
+/* ============================================================
+   LES ÉNIGMES DU DRESSEUR (façon Père Fouras)
+   ============================================================ */
+let enigme = null, essais = 0, resolues = 0, rage = 0, dejaPosees = [];
+const RAGE_MAX = 3;
+const norm = v => v.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/œ/g,"oe")
+  .replace(/^(?:(?:le|la|les|un|une|des|du)\s+|l')/,"").replace(/[^a-z' ]/g,"").trim();
+
+function startRiddles(){
+  resolues = 0; rage = 0;
+  document.getElementById("tx-tot").textContent = EPREUVES[current].nb;
+  newRiddle();
+  show("scr-trex");
+}
+function renderRage(){
+  let pas = "";
+  for(let k = 0; k < RAGE_MAX; k++) pas += '<i class="' + (k < rage ? "on" : "") + '"></i>';
+  document.getElementById("tx-rage").innerHTML = '<span>🦖 Le T-Rex approche</span><span class="pips">' + pas + '</span>';
+}
+function newRiddle(){
+  if(dejaPosees.length >= ENIGMES.length) dejaPosees = [];
+  const libres = ENIGMES.filter(e => !dejaPosees.includes(e));
+  enigme = libres[Math.floor(Math.random() * libres.length)];
+  dejaPosees.push(enigme);
+  essais = 0;
+  document.getElementById("tx-num").textContent = resolues + 1;
+  document.getElementById("tx-riddle").innerHTML = enigme.txt + '<span class="q">Qui suis-je ?</span>';
+  document.getElementById("inp-trex").value = "";
+  document.getElementById("msg-trex").classList.remove("show");
+  renderRage();
+}
+function approche(m, txt){
+  rage++;
+  renderRage();
+  if(rage < RAGE_MAX) return flash(m, txt);
+  rage = 0;
+  flash(m, "🦖 GRRRAAAOU ! Le T-Rex vous a attrapés ! Gage : " + GAGES[Math.floor(Math.random() * GAGES.length)] + " Puis on continue.", false, true);
+  setTimeout(renderRage, 400);
+}
+function answerTrex(){
+  const m = document.getElementById("msg-trex");
+  const v = norm(document.getElementById("inp-trex").value);
+  if(!v) return flash(m, "Le Dresseur attend votre réponse…");
+  if(enigme.ok.includes(v)){
+    resolues++;
+    if(resolues >= EPREUVES[current].nb){
+      flash(m, "✓ Le Dresseur s'incline : vous avez résolu toutes ses énigmes !", true);
+      return win(current);
+    }
+    flash(m, "✓ Bonne réponse ! Le Dresseur prépare la suivante…", true);
+    return setTimeout(newRiddle, 1400);
+  }
+  essais++;
+  approche(m, essais >= 2 ? "GRRR ! Le T-Rex se rapproche… Petit indice : " + enigme.aide : "GRRR ! Mauvaise réponse, le T-Rex se rapproche…");
+}
+function skipRiddle(){
+  approche(document.getElementById("msg-trex"), "Énigme passée… mais le T-Rex se rapproche !");
+  const m = document.getElementById("msg-trex"), msg = m.textContent, garde = m.className;
+  newRiddle();
+  m.textContent = msg; m.className = garde;
+}
+
+if(!BOUTON_TEST) document.getElementById("testbar").style.display = "none";
+
+/* Entrée clavier = valider le champ courant */
+document.addEventListener("keydown", e => {
+  if(e.key !== "Enter") return;
+  const scr = document.querySelector(".screen.on").id;
+  if(scr === "scr-puzzle") submitCode();
+  else if(scr === "scr-move") submitLate();
+  else if(scr === "scr-trex") answerTrex();
+});
+
+/* Démarrage : reprendre la partie en cours s'il y en a une
+   (une ancienne sauvegarde d'une version précédente est ignorée) */
+state = load();
+if(state && (!(state.equipe in EQUIPES) || !state.ok)) state = null;
+if(!state) renderIntro();
+else if(state.fin) openReveal(false);
+else if(!state.top) showTop();
+else {
+  const h = horloge();
+  lastKey = h.key;
+  garderEcran();
+  if(h.phase === "revelation") openReveal(false);
+  else if(h.phase === "epreuve") reussi(ordre()[h.r]) ? showMap() : openPuzzle(ordre()[h.r]);
+  else openMove();
+}
+</script>
+</body>
+</html>
