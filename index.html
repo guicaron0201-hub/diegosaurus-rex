@@ -444,10 +444,20 @@ button.reset{
 .rv-cuisine{font-size:18px !important;color:var(--bone) !important;margin:0 auto 16px !important}
 
 .bougie{margin-top:16px;padding:16px;border-radius:12px;background:var(--amber);color:#241a06;font-size:18px;font-weight:900;line-height:1.4;box-shadow:0 4px 0 #8f6412;animation:pouls 1.4s ease-in-out infinite}
+
+/* ---------- bouton son ---------- */
+button.son{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:60;
+  width:46px;height:46px;margin:0;padding:0;border-radius:50%;font-size:20px;letter-spacing:0;
+  background:rgba(11,22,15,.85);border:2px solid var(--amber);box-shadow:0 4px 12px rgba(0,0,0,.5)}
+button.son.off{border-color:var(--jungle-600);opacity:.8}
+.launch-wrap{bottom:66px !important}
 </style>
 </head>
 <body>
 <div class="wrap">
+
+<!-- Ambiance sonore de la jungle (générée par l'app) : bouton pour couper / remettre -->
+<button class="son" id="btn-son" onclick="basculerSon()" aria-label="Couper ou remettre le son">🔊</button>
 
 <!-- Animation de départ d'épreuve : la mâchoire du dino -->
 <div class="chomp" id="chomp" aria-hidden="true">
@@ -916,6 +926,240 @@ function proofsHTML(){
       : '<div><span class="e">?</span><span class="n">Indice ' + (pos+1) + '</span></div>';
   }).join("");
 }
+
+/* ============================================================
+   AMBIANCE SONORE — musique d'aventure + jungle, créées en direct
+   (nappe orchestrale, timbales, vent, insectes, oiseaux, rugissements).
+   Rien n'est téléchargé : tout est synthétisé par le téléphone.
+   ============================================================ */
+const SON_KEY = "parc-diego:son";
+let sonOn = true;
+try { sonOn = localStorage.getItem(SON_KEY) !== "off"; } catch(e){}
+let ac = null, sortie = null, reverb = null, bruit = null;
+
+function hasard(a, b){ return a + Math.random() * (b - a); }
+function vers(node, humide){           // envoie un son vers la sortie, avec un peu d'écho
+  node.connect(sortie);
+  if(humide){ const g = ac.createGain(); g.gain.value = humide; node.connect(g); g.connect(reverb); }
+}
+function panoramique(node, x){
+  if(!ac.createStereoPanner) return node;
+  const pn = ac.createStereoPanner(); pn.pan.value = x; node.connect(pn); return pn;
+}
+function demarrerAmbiance(){
+  if(ac){ if(ac.state === "suspended") ac.resume(); return; }
+  try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ return; }
+  sortie = ac.createGain(); sortie.gain.value = sonOn ? 0.9 : 0; sortie.connect(ac.destination);
+  // écho de sous-bois : réverbération fabriquée à partir de bruit
+  reverb = ac.createConvolver();
+  const n = ac.sampleRate * 3.2, ir = ac.createBuffer(2, n, ac.sampleRate);
+  for(let c = 0; c < 2; c++){ const d = ir.getChannelData(c); for(let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
+  reverb.buffer = ir;
+  const rg = ac.createGain(); rg.gain.value = 0.5; reverb.connect(rg); rg.connect(sortie);
+  // bruit blanc réutilisable
+  bruit = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+  const b = bruit.getChannelData(0); for(let i = 0; i < b.length; i++) b[i] = Math.random() * 2 - 1;
+
+  ventForet(); insectes(); boucleMusique();
+  setTimeout(oiseaux, 1500);
+  setTimeout(rugissement, 4000);
+  majBoutonSon();
+}
+function sourceBruit(){ const src = ac.createBufferSource(); src.buffer = bruit; src.loop = true; return src; }
+
+/* le vent dans les arbres : bruit filtré qui ondule lentement */
+function ventForet(){
+  const src = sourceBruit(), f = ac.createBiquadFilter(), g = ac.createGain();
+  f.type = "lowpass"; f.frequency.value = 650; g.gain.value = 0.045;
+  const lfo = ac.createOscillator(), lg = ac.createGain();
+  lfo.frequency.value = 0.07; lg.gain.value = 0.025; lfo.connect(lg); lg.connect(g.gain); lfo.start();
+  src.connect(f); f.connect(g); vers(g, 0.2); src.start();
+}
+/* les insectes : un grésillement aigu qui pulse */
+function insectes(){
+  const src = sourceBruit(), f = ac.createBiquadFilter(), g = ac.createGain(), am = ac.createGain();
+  f.type = "bandpass"; f.frequency.value = 5400; f.Q.value = 9;
+  g.gain.value = 0.5; am.gain.value = 0.018;   // 0,5 ± 0,5 : le grésillement pulse de 0 à 1
+  const puls = ac.createOscillator(); puls.type = "square"; puls.frequency.value = 26;
+  const pg = ac.createGain(); pg.gain.value = 0.5; puls.connect(pg); pg.connect(g.gain); puls.start();
+  src.connect(f); f.connect(g); g.connect(am); vers(panoramique(am, 0.4), 0.1); src.start();
+}
+/* un oiseau : une petite série de pépiements */
+function oiseaux(){
+  if(!ac) return;
+  const t0 = ac.currentTime, nb = Math.floor(hasard(2, 6)), base = hasard(2200, 4200), pan = hasard(-0.8, 0.8);
+  for(let k = 0; k < nb; k++){
+    const t = t0 + k * hasard(0.11, 0.2), o = ac.createOscillator(), g = ac.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(base, t);
+    o.frequency.exponentialRampToValueAtTime(base * hasard(1.25, 1.6), t + 0.05);
+    o.frequency.exponentialRampToValueAtTime(base * 0.9, t + 0.11);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.05, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0008, t + 0.13);
+    o.connect(g); vers(panoramique(g, pan), 0.35); o.start(t); o.stop(t + 0.15);
+  }
+  setTimeout(oiseaux, hasard(1800, 5500));
+}
+/* ---------- les cris de dinosaures : 5 espèces, à des distances variées ---------- */
+function distorsion(force){
+  const w = ac.createWaveShaper(), c = new Float32Array(512);
+  for(let i = 0; i < 512; i++){ const x = i / 256 - 1; c[i] = Math.tanh(force * x); }
+  w.curve = c; return w;
+}
+/* une « voix » : oscillateur + souffle, qui glisse d'une note à l'autre, avec une enveloppe */
+function voix(o){
+  const t = o.t, dur = o.dur, sortieVoix = ac.createGain();
+  sortieVoix.gain.setValueAtTime(0, t);
+  sortieVoix.gain.linearRampToValueAtTime(o.vol, t + dur * (o.attaque || 0.15));
+  sortieVoix.gain.setValueAtTime(o.vol, t + dur * 0.6);
+  sortieVoix.gain.exponentialRampToValueAtTime(0.0005, t + dur);
+  const f = ac.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = o.filtre; f.Q.value = o.q || 1;
+  const d = distorsion(o.grain || 3);
+  d.connect(f); f.connect(sortieVoix);
+  const osc = ac.createOscillator(); osc.type = o.onde || "sawtooth";
+  osc.frequency.setValueAtTime(o.f[0], t);
+  o.f.slice(1).forEach((fr, k) => osc.frequency.exponentialRampToValueAtTime(fr, t + dur * (k + 1) / (o.f.length - 1)));
+  if(o.vibrato){
+    const v = ac.createOscillator(), vg = ac.createGain();
+    v.frequency.value = o.vibrato; vg.gain.value = o.f[0] * (o.vibratoAmp || 0.06);
+    v.connect(vg); vg.connect(osc.frequency); v.start(t); v.stop(t + dur + 0.1);
+  }
+  osc.connect(d); osc.start(t); osc.stop(t + dur + 0.1);
+  if(o.souffle){
+    const nz = sourceBruit(), nf = ac.createBiquadFilter(), ng = ac.createGain();
+    nf.type = "bandpass"; nf.frequency.value = o.souffleF || 600; nf.Q.value = 1; ng.gain.value = o.souffle;
+    nz.connect(nf); nf.connect(ng); ng.connect(d); nz.start(t); nz.stop(t + dur + 0.1);
+  }
+  vers(panoramique(sortieVoix, o.pan), o.echo);
+}
+const CRIS = {
+  // le T-Rex : un rugissement grave, long, qui tremble
+  trex(t, pan, echo){
+    voix({ t, dur: 2.8, vol: 0.26, f:[70, 105, 62, 48], filtre: 950, grain: 5, vibrato: 9, vibratoAmp: 0.1, souffle: 0.7, souffleF: 420, pan, echo, attaque: 0.25 });
+    voix({ t: t + 0.05, dur: 2.6, vol: 0.1, f:[140, 210, 120, 95], filtre: 1600, grain: 4, vibrato: 13, souffle: 0.3, souffleF: 900, pan, echo });
+  },
+  // les raptors : des appels courts et perçants, qui se répondent
+  raptors(t, pan, echo){
+    const nb = Math.floor(hasard(2, 5));
+    for(let k = 0; k < nb; k++){
+      const tk = t + k * hasard(0.35, 0.7), f0 = hasard(650, 900), p = Math.max(-1, Math.min(1, pan + hasard(-0.4, 0.4)));
+      voix({ t: tk, dur: hasard(0.35, 0.55), vol: 0.1, f:[f0, f0 * 1.35, f0 * 0.6], filtre: 3200, grain: 6, vibrato: 32, vibratoAmp: 0.04, souffle: 0.5, souffleF: 2200, pan: p, echo, attaque: 0.1 });
+    }
+  },
+  // le brachiosaure : un long appel grave et doux, presque mélancolique
+  brachio(t, pan, echo){
+    voix({ t, dur: 3.4, vol: 0.14, onde: "triangle", f:[98, 130, 123, 82], filtre: 700, grain: 1.5, vibrato: 4, vibratoAmp: 0.02, pan, echo, attaque: 0.4 });
+    voix({ t: t + 0.1, dur: 3.2, vol: 0.05, onde: "triangle", f:[196, 260, 246, 164], filtre: 900, grain: 1.2, vibrato: 4, pan, echo, attaque: 0.4 });
+  },
+  // le ptérodactyle : un cri strident qui descend
+  ptero(t, pan, echo){
+    voix({ t, dur: 1.1, vol: 0.08, f:[1500, 2100, 900], filtre: 4000, grain: 4, vibrato: 18, vibratoAmp: 0.05, souffle: 0.35, souffleF: 3000, pan, echo, attaque: 0.08 });
+  },
+  // le tricératops : quelques grognements sourds
+  trice(t, pan, echo){
+    const nb = Math.floor(hasard(2, 4));
+    for(let k = 0; k < nb; k++)
+      voix({ t: t + k * hasard(0.45, 0.7), dur: 0.5, vol: 0.18, f:[62, 78, 55], filtre: 520, grain: 6, souffle: 0.8, souffleF: 300, pan, echo, attaque: 0.2 });
+  }
+};
+function rugissement(){
+  if(!ac) return;
+  const types = ["trex", "trex", "raptors", "raptors", "brachio", "ptero", "trice"];
+  const type = types[Math.floor(Math.random() * types.length)];
+  const loin = hasard(0.45, 0.95);   // plus c'est loin, plus il y a d'écho
+  CRIS[type](ac.currentTime + 0.05, hasard(-0.9, 0.9), loin);
+  setTimeout(rugissement, hasard(7000, 16000));
+}
+
+/* ---------- la musique d'aventure : cordes, cuivres héroïques et tambours ---------- */
+const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
+const TEMPO = 88, TEMPS = 60 / TEMPO, MESURE = 4 * TEMPS;
+// 8 accords (si bémol majeur), 2 mesures chacun — progression originale
+const ACCORDS = [
+  [46, 53, 58, 62], [51, 55, 58, 63], [48, 55, 60, 63], [41, 53, 57, 60],
+  [46, 53, 58, 65], [43, 55, 58, 62], [51, 58, 63, 67], [41, 53, 57, 65]
+];
+// une mélodie de cuivres originale : [note, début (en temps), durée (en temps)] sur 8 temps
+const MELODIE = [
+  [[70,0,1.5],[72,1.5,0.5],[74,2,2],[77,4,3]],
+  [[75,0,1],[74,1,1],[72,2,2],[70,4,3]],
+  [[72,0,1.5],[74,1.5,0.5],[75,2,1],[79,3,3]],
+  [[77,0,2],[75,2,1],[74,3,1],[72,4,3]],
+  [[70,0,1],[74,1,1],[77,2,2],[82,4,3]],
+  [[79,0,1.5],[77,1.5,0.5],[74,2,2],[70,4,3]],
+  [[75,0,1],[79,1,1],[82,2,2],[79,4,2],[77,6,1]],
+  [[77,0,2],[72,2,2],[74,4,1.5],[70,5.5,2]]
+];
+let accord = 0;
+function cuivre(n, t, d){
+  const g = ac.createGain(), f = ac.createBiquadFilter();
+  f.type = "lowpass"; f.Q.value = 2;
+  f.frequency.setValueAtTime(500, t); f.frequency.linearRampToValueAtTime(2200, t + 0.12); f.frequency.linearRampToValueAtTime(1300, t + d);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.045, t + 0.06); g.gain.setValueAtTime(0.04, t + d * 0.8); g.gain.linearRampToValueAtTime(0, t + d + 0.08);
+  f.connect(g); vers(g, 0.45);
+  [-6, 6].forEach(dt => {
+    const o = ac.createOscillator(); o.type = "sawtooth"; o.frequency.value = NOTE(n); o.detune.value = dt;
+    const vib = ac.createOscillator(), vg = ac.createGain(); vib.frequency.value = 5; vg.gain.value = 4;
+    vib.connect(vg); vg.connect(o.detune); vib.start(t); vib.stop(t + d + 0.2);
+    o.connect(f); o.start(t); o.stop(t + d + 0.2);
+  });
+}
+function tambour(t, grave, fort){
+  const o = ac.createOscillator(), g = ac.createGain(), f0 = grave ? 62 : 98;
+  o.type = "sine"; o.frequency.setValueAtTime(f0 * 1.6, t); o.frequency.exponentialRampToValueAtTime(f0, t + 0.12);
+  g.gain.setValueAtTime(fort, t); g.gain.exponentialRampToValueAtTime(0.001, t + (grave ? 0.9 : 0.45));
+  o.connect(g); vers(g, 0.3); o.start(t); o.stop(t + 1);
+  // l'attaque de la peau
+  const nz = sourceBruit(), nf = ac.createBiquadFilter(), ng = ac.createGain();
+  nf.type = "bandpass"; nf.frequency.value = grave ? 180 : 320; ng.gain.setValueAtTime(fort * 0.5, t); ng.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+  nz.connect(nf); nf.connect(ng); vers(ng, 0.2); nz.start(t); nz.stop(t + 0.1);
+}
+function boucleMusique(){
+  if(!ac) return;
+  const t = ac.currentTime + 0.05, k = accord % ACCORDS.length, notes = ACCORDS[k], dur = 2 * MESURE;
+  accord++;
+  // les cordes : une nappe d'accords
+  const bus = ac.createGain(), f = ac.createBiquadFilter();
+  f.type = "lowpass"; f.frequency.value = 1300; f.Q.value = 0.6;
+  bus.gain.setValueAtTime(0, t); bus.gain.linearRampToValueAtTime(1, t + 0.8);
+  bus.gain.setValueAtTime(1, t + dur - 0.3); bus.gain.linearRampToValueAtTime(0, t + dur + 0.8);
+  bus.connect(f); vers(f, 0.6);
+  notes.forEach(n => [-8, 8].forEach(dt => {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = "sawtooth"; o.frequency.value = NOTE(n); o.detune.value = dt; g.gain.value = 0.009;
+    o.connect(g); g.connect(bus); o.start(t); o.stop(t + dur + 0.9);
+  }));
+  // la basse
+  const basse = ac.createOscillator(), bg = ac.createGain();
+  basse.type = "triangle"; basse.frequency.value = NOTE(notes[0] - 12); bg.gain.value = 0.07;
+  basse.connect(bg); vers(bg, 0.1); basse.start(t); basse.stop(t + dur);
+  // les tambours d'aventure : un rythme qui avance
+  for(let m = 0; m < 2; m++){
+    const tm = t + m * MESURE;
+    tambour(tm, true, 0.34);
+    tambour(tm + TEMPS * 1.5, false, 0.16);
+    tambour(tm + TEMPS * 2, true, 0.26);
+    tambour(tm + TEMPS * 3, false, 0.14);
+    tambour(tm + TEMPS * 3.5, false, 0.18);
+  }
+  // la mélodie de cuivres (une fois sur deux, pour laisser respirer)
+  if(Math.floor(accord / ACCORDS.length) % 2 === 0)
+    MELODIE[k].forEach(([n, debut, d]) => cuivre(n, t + debut * TEMPS, d * TEMPS));
+  setTimeout(boucleMusique, dur * 1000 - 40);
+}
+function majBoutonSon(){
+  const b = document.getElementById("btn-son");
+  if(b){ b.textContent = sonOn ? "🔊" : "🔇"; b.classList.toggle("off", !sonOn); }
+}
+function basculerSon(){
+  sonOn = !sonOn;
+  try { localStorage.setItem(SON_KEY, sonOn ? "on" : "off"); } catch(e){}
+  demarrerAmbiance();
+  if(sortie) sortie.gain.setTargetAtTime(sonOn ? 0.9 : 0, ac.currentTime, 0.2);
+  majBoutonSon();
+}
+// le son ne peut démarrer qu'après un premier appui (règle des navigateurs)
+document.addEventListener("pointerdown", e => { if(e.target.id !== "btn-son") demarrerAmbiance(); });
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && ac && ac.state === "suspended") ac.resume(); });
 
 /* ============================================================
    HORLOGE COMMUNE

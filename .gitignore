@@ -42,3 +42,6 @@ Thumbs.db
 
 # Photo originale (lourde) : seule la version allégée diego.jpg est publiée
 diegosaurus.png
+
+# Musique sous droits d'auteur : jamais sur le dépôt public
+*.mp3
