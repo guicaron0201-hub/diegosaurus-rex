@@ -305,6 +305,34 @@ button.reset{
 .proofs div{flex:1 1 0;min-width:0}
 .proofs .n{overflow-wrap:anywhere;hyphens:auto}
 .proofs.four .n{font-size:8.5px;letter-spacing:.04em}
+
+/* ---------- analyse ADN ---------- */
+.adn,.lab-wait{display:none;margin-top:14px}
+.adn-bar{height:16px;border-radius:8px;background:var(--jungle-900);border:1px solid var(--crate);overflow:hidden}
+.adn-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok),var(--amber-bright))}
+.adn-pct{text-align:center;font-size:34px;font-weight:800;color:var(--amber-bright);margin:10px 0 2px;font-variant-numeric:tabular-nums}
+.adn-step{text-align:center;font-size:14px;color:var(--bone-dim);min-height:1.5em}
+.lab-wait{padding:14px;border-radius:12px;background:rgba(111,191,115,.1);border:2px solid var(--ok)}
+.lab-wait b{display:block;color:var(--ok);font-size:17px;margin-bottom:6px}
+.lab-wait p{margin:0;font-size:15px;line-height:1.55}
+
+/* ---------- révélation ---------- */
+.rv-radar{min-height:calc(100dvh - 60px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px}
+.radar{position:relative;width:230px;height:230px;border-radius:50%;border:2px solid var(--ok);
+  background:repeating-radial-gradient(circle,transparent 0 36px,rgba(111,191,115,.25) 36px 38px);overflow:hidden;box-shadow:0 0 40px rgba(111,191,115,.35)}
+.radar i{position:absolute;inset:0;background:conic-gradient(from 0deg,rgba(111,191,115,.55),transparent 60deg);animation:scan 1.4s linear infinite}
+@keyframes scan{to{transform:rotate(360deg)}}
+.rv-radar-t{font-size:22px;font-weight:800;color:var(--ok);text-align:center;letter-spacing:.04em}
+.reveal .tag{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ok);margin-bottom:14px}
+.reveal .diego{display:block;width:100%;max-width:320px;aspect-ratio:1;object-fit:cover;margin:0 auto 16px;border-radius:16px;border:4px solid var(--amber)}
+.reveal h2{font-size:30px}
+.bilan{text-align:center}
+.bilan .tag{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.bilan h2{margin:8px 0 14px;font-size:22px;color:var(--amber-bright)}
+.stats{display:flex;gap:10px}
+.stats div{flex:1;padding:12px 6px;border-radius:10px;background:var(--jungle-900);border:1px solid var(--jungle-600)}
+.stats b{display:block;font-size:26px;color:var(--bone)}
+.stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--bone-dim)}
 </style>
 </head>
 <body>
@@ -451,7 +479,7 @@ button.reset{
       <h2 id="mv-name"></h2>
       <div style="font-size:12px;color:var(--bone-dim);letter-spacing:.14em;text-transform:uppercase;margin-top:4px" id="mv-zone"></div>
     </div>
-    <div class="chrono-box" id="mv-chrono" style="margin-top:16px"><span class="l">Départ de l'épreuve dans</span><span class="t" id="mv-time">1:00</span></div>
+    <div class="chrono-box" id="mv-chrono" style="margin-top:16px"><span class="l" id="mv-chrono-l">Départ de l'épreuve dans</span><span class="t" id="mv-time">1:00</span></div>
     <p class="stop" id="mv-stop">⛔ Rejoignez l'épreuve, mais <strong>ne commencez pas avant la fin du compte à rebours</strong>. Le téléphone vous dira quand c'est parti !</p>
     <div class="radio" id="mv-radio"></div>
 
@@ -495,23 +523,47 @@ button.reset{
     <!-- 5b. code maître -->
     <div id="lab-code" style="display:none">
       <div class="radio" id="lab-verdict"></div>
-      <button class="start" onclick="submitFinal()">📡 Lancer le radar</button>
+      <button class="start" id="btn-adn" onclick="analyseADN()">🧬 Lancer l'analyse ADN</button>
+      <div id="adn" class="adn">
+        <div class="adn-bar"><i id="adn-fill"></i></div>
+        <div class="adn-pct" id="adn-pct">0 %</div>
+        <div class="adn-step" id="adn-step"></div>
+      </div>
+      <div id="lab-wait" class="lab-wait">
+        <b>✅ Correspondance ADN : 100 %</b>
+        <p>C'est bien lui. Le radar va maintenant localiser le Diegosaurus Rex… <strong>pour toutes les équipes en même temps</strong>. Gardez le téléphone en main et restez devant la maison !</p>
+        <div class="chrono-box" style="margin:14px 0 0;position:static"><span class="l">Révélation dans</span><span class="t" id="lab-time">5:00</span></div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- ============ 6. FINAL ============ -->
 <section id="scr-win" class="screen">
-  <div class="tape"></div>
-  <div class="crate final">
-    <div class="big">🦕</div>
-    <h2>Diegosaurus Rex localisé !</h2>
-    <p>Le radar a parlé : il vous attend <strong style="color:var(--bone)">à la maison, devant son gâteau d'anniversaire</strong>. Mission accomplie, rangers !</p>
-    <div class="chrono" id="lbl-chrono"></div>
-    <div class="go">🎂 Tous à la maison<br>pour le retrouver !</div>
-    <p style="margin-top:14px;font-size:14px">Joyeux anniversaire Diego ! Et attention… le T-Rex n'est jamais loin de lui.</p>
+  <!-- 1. le radar s'emballe -->
+  <div id="rv-radar" class="rv-radar">
+    <div class="radar"><i></i></div>
+    <div class="rv-radar-t" id="rv-radar-t">📡 Radar activé…</div>
   </div>
-  <button class="ghost" onclick="restart()">Recommencer la partie</button>
+  <!-- 2. la révélation -->
+  <div id="rv-fin">
+    <div class="tape"></div>
+    <div class="crate final reveal">
+      <div class="tag">🦕 Diegosaurus Rex · localisé</div>
+      <img class="diego" src="diego.jpg" alt="Diego" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'big',textContent:'🦕'}))">
+      <h2>C'est Diego !</h2>
+      <p>Le plus rare, le plus mignon et le moins dormeur des dinosaures fête aujourd'hui son <strong style="color:var(--bone)">1er anniversaire</strong>.</p>
+      <div class="go">🎂 Joyeux anniversaire Diego !</div>
+      <p style="margin-top:14px;font-size:14px">Place au gâteau… et attention, le T-Rex n'est jamais loin de lui.</p>
+    </div>
+    <div class="crate bilan">
+      <div class="tag" id="rv-team"></div>
+      <h2 id="rv-titre"></h2>
+      <div class="stats" id="rv-stats"></div>
+      <p class="wait">Ornella annonce maintenant les résultats des 4 équipes !</p>
+    </div>
+    <button class="ghost" onclick="restart()">Recommencer la partie</button>
+  </div>
 </section>
 
 <!-- Bouton de test : redémarrer le jeu (à retirer le jour J : BOUTON_TEST = false) -->
@@ -541,8 +593,8 @@ const PROLOGUE = [
 /* Les 4 épreuves. type "code" = l'équipe tape un code trouvé sur place ;
    type "enigmes" = le téléphone pose les énigmes du Dresseur. */
 const EPREUVES = [
-  { ico:"🦏", nom:"Le défi d'Alain", court:"Pétanque contre Alain", zone:"Terrain de pétanque", type:"duel", voix:ALAIN, maitre:"Alain",
-    route:"Direction le terrain de pétanque : Alain le Tricératops vous attend de pied ferme !",
+  { ico:"🦏", nom:"Le défi d'Alain", court:"Pétanque contre Alain", zone:"L'enclos d'Alain le Tricératops", lieu:"le terrain de pétanque", type:"duel", voix:ALAIN, maitre:"Alain",
+    route:"Direction l'enclos d'Alain le Tricératops, sur le terrain de pétanque : Alain vous attend de pied ferme !",
     arrivee:"Je suis Alain, le Tricératops ! Le Diegosaurus Rex a laissé tomber quelque chose dans mon enclos cette nuit… Vous le voulez ? Alors battez-moi aux boules… si vous en êtes capables : personne ne m'a jamais battu !",
     indice:{ etapes:[
         "Alain lance le cochonnet.",
@@ -554,9 +606,9 @@ const EPREUVES = [
     preuve:{ ico:"🍼", nom:"Un biberon", court:"Biberon",
       texte:"Alain vous tend ce que le petit a oublié dans son enclos : un biberon encore tiède, avec des traces de dents sur la tétine. Vide, évidemment. D'après Alain, le Diegosaurus Rex en réclame un toutes les trois heures, en hurlant plus fort qu'un T-Rex… y compris à 4 h du matin. Conclusion : il boit encore du lait, et il sait se faire entendre." } },
 
-  { ico:"🔤", nom:"Le mot secret du jardin", court:"Chasse aux lettres", zone:"Le jardin", code:"ECLORE", type:"lettres", nb:6, voix:ORNELLA,
+  { ico:"🔤", nom:"Le mot secret de la Serre", court:"Chasse aux lettres", zone:"La Serre préhistorique", lieu:"le jardin", code:"ECLORE", type:"lettres", nb:6, voix:ORNELLA,
     label:"Le mot secret",
-    route:"Direction le jardin : le Diegosaurus Rex y a semé un mot secret, lettre par lettre…",
+    route:"Direction la Serre préhistorique, dans le jardin : le Diegosaurus Rex y a semé un mot secret, lettre par lettre…",
     arrivee:"Rangers, cette nuit, le Diegosaurus Rex a semé des lettres partout dans le jardin. Retrouvez-les et devinez le mot secret ! Un indice : c'est ce que font les œufs de dinosaure quand leur heure est venue…",
     indice:{ etapes:[
         "<strong>6 lettres</strong> sont cachées dans le jardin.",
@@ -569,8 +621,8 @@ const EPREUVES = [
     preuve:{ ico:"👣", nom:"Une empreinte pointure 21", court:"Pointure 21",
       texte:"ÉCLORE, bravo ! Et juste à côté de la dernière lettre : une empreinte minuscule dans la terre. Les scientifiques l'ont mesurée : pointure 21. Pas de griffes, pas d'écailles… cinq petits orteils tout ronds. Le Diegosaurus Rex marche depuis peu et, visiblement, il tombe souvent : on retrouve une empreinte de fesses tous les trois pas." } },
 
-  { ico:"🎯", nom:"L'antre du T-Rex", court:"Fléchettes contre le Dresseur", zone:"La forêt", type:"duel", voix:DRESSEUR, maitre:"le Dresseur",
-    route:"Direction la forêt : le Dresseur du T-Rex s'y cache… à vous de le débusquer !",
+  { ico:"🎯", nom:"L'antre du T-Rex", court:"Fléchettes contre le Dresseur", zone:"La forêt du T-Rex", lieu:"la forêt", type:"duel", voix:DRESSEUR, maitre:"le Dresseur",
+    route:"Direction la forêt du T-Rex : le Dresseur s'y cache… à vous de le débusquer !",
     cherche:{ voix:ORNELLA,
       texte:"Le Dresseur du T-Rex se cache quelque part dans la forêt. Il n'affronte que ceux qui arrivent à le trouver ! Il est très bien camouflé… Tendez l'oreille : il lui arrive de rugir.",
       mission:{ etapes:[
@@ -588,8 +640,8 @@ const EPREUVES = [
     preuve:{ ico:"🌙", nom:"Le rapport secret des parents", court:"Rapport",
       texte:"Le Dresseur s'incline et vous tend un dossier que son T-Rex a déterré : « Rapport confidentiel des parents du Diegosaurus Rex ». Nuits complètes depuis sa naissance : 0. Réveils par nuit : entre 2 et 11. Heure de réveil préférée : 5 h 47. Cafés bus par les parents : 1 247, et le compteur tourne encore. Berceuse chantée pour l'endormir : toujours la même, environ 3 000 fois. Conclusion du rapport : l'espèce ne dort jamais… mais elle est adorable." } },
 
-  { ico:"🏓", nom:"Le Dino-pong d'Ornella", court:"Pong contre Ornella", zone:"La terrasse", type:"duel", voix:ORNELLA, maitre:"Ornella",
-    route:"Direction la terrasse : Ornella, la directrice du parc, vous défie en personne au Dino-pong !",
+  { ico:"🏓", nom:"Le Dino-pong d'Ornella", court:"Pong contre Ornella", zone:"Le QG de la Directrice", lieu:"la table de ping-pong, dans le jardin", type:"duel", voix:ORNELLA, maitre:"Ornella",
+    route:"Direction le QG de la Directrice, à la table de ping-pong du jardin : Ornella vous défie en personne au Dino-pong !",
     arrivee:"Vous voilà enfin ! Le Diegosaurus Rex a oublié quelque chose dans mon bureau… Je vous le donne si vous me battez au Dino-pong. Mais je vous préviens : je suis la championne du parc !",
     indice:{ etapes:[
         "Votre équipe et Ornella lancent <strong>en même temps</strong> dans les verres d'en face.",
@@ -602,8 +654,8 @@ const EPREUVES = [
       texte:"Beau joueur, Ornella vous montre ce qu'elle a trouvé sous son bureau : une télécommande entièrement mâchouillée, trempée de bave, avec les touches 4, 7 et « Volume + » arrachées. Le Diegosaurus Rex a une passion dans la vie : tout ce qui n'est pas un jouet. Clés, téléphones, chaussures, câbles… Plus c'est interdit, plus c'est délicieux." } }
 ];
 
-const LABO = { ico:"🧬", nom:"Labo génétique", court:"Labo génétique", zone:"Le camp de base",
-  route:"Toutes les épreuves sont terminées ! Retournez au camp de base avec vos indices : le labo génétique va identifier le Diegosaurus Rex." };
+const LABO = { ico:"🧬", nom:"Le Labo génétique", court:"Labo génétique", zone:"Le Labo génétique", lieu:"devant la maison",
+  route:"Toutes les épreuves sont terminées ! Toutes les équipes, rendez-vous devant la maison : le labo génétique va identifier le Diegosaurus Rex." };
 
 /* 4 équipes, 4 épreuves : chaque équipe commence ailleurs et tourne dans le même sens.
    À chaque round, chaque épreuve accueille exactement une équipe. */
@@ -625,9 +677,9 @@ const LAB_INTRO = ["Bravo, rangers ! Le labo a 4 fiches d'espèces. <strong>Laqu
   "Comparez avec vos quatre indices."];
 const TOP_TXT = (e, duree, trajet) => [
   "Rangers, préparez-vous ! Quand je dirai <strong>« 3, 2, 1… TOP ! »</strong>, toutes les équipes appuient en même temps sur le bouton.",
-  "Après le TOP, vous avez " + trajet + " pour rejoindre votre première épreuve : <strong>" + e.court + "</strong> (" + e.zone + "). <strong>Ne commencez qu'à la fin de ce compte à rebours !</strong>",
+  "Après le TOP, vous avez " + trajet + " pour rejoindre votre première épreuve : <strong>" + e.court + "</strong> (📍 " + (e.lieu || e.zone) + "). <strong>Ne commencez qu'à la fin de ce compte à rebours !</strong>",
   "Chaque épreuve dure ensuite " + duree + ". À la fin, l'écran vous envoie tout seul à la suivante."];
-const VERDICT = "Identification réussie ! Pointure 21, un biberon toutes les trois heures, zéro nuit complète et une passion pour les télécommandes : c'est bien le Diegosaurus Rex. Lancez le radar pour savoir où il se cache !";
+const VERDICT = "Identification réussie ! Pointure 21, un biberon toutes les trois heures, zéro nuit complète et une passion pour les télécommandes : c'est bien le Diegosaurus Rex. Lancez l'analyse ADN pour le confirmer !";
 
 /* En réserve pour plus tard : une épreuve avec type:"enigmes" et nb:3 utilise ces énigmes.
    Énigmes façon Père Fouras : "ok" liste les réponses acceptées
@@ -674,6 +726,7 @@ const TEST = /[?&]test/.test(location.search);
 const DUREE  = TEST ? 40 : 10 * 60;   // durée d'une épreuve, en secondes
 const TRAJET = TEST ? 15 :  1 * 60;   // temps pour changer d'épreuve, en secondes
 const TOURS  = 4;
+const FINAL  = TEST ? 30 : 5 * 60;    // temps au labo avant la révélation commune, en secondes
 
 let state = null, current = null, introPage = 0, lastKey = null;
 
@@ -683,6 +736,7 @@ function show(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
   document.getElementById(id).classList.add("on");
   window.scrollTo(0,0);
+  majBoutonTest();
 }
 function flash(el, txt, ok, reste){
   el.textContent = txt;
@@ -703,6 +757,7 @@ function regles(r){
     (r.gagner ? '<p class="rule-win">🏆 ' + r.gagner + "</p>" : "") +
     (r.sinon ? '<p class="rule-lose">⏰ ' + r.sinon + "</p>" : "");
 }
+const ou = e => e.zone + (e.lieu ? " · 📍 " + e.lieu : "");   // nom de l'épreuve + lieu réel
 const duree = sec => sec >= 60 ? Math.round(sec / 60) + " minute" + (sec >= 120 ? "s" : "") : sec + " secondes";
 const mmss = sec => Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
 
@@ -725,14 +780,20 @@ function horloge(){
   if(!state || !state.top) return null;
   const t = Math.max(0, Math.floor((Date.now() - state.top) / 1000));
   const cycle = TRAJET + DUREE, r = Math.floor(t / cycle);
-  if(r >= TOURS) return { phase:"labo", r:TOURS, reste:0, key:"labo" };
+  if(r >= TOURS){
+    const l = t - TOURS * cycle;
+    return l < FINAL
+      ? { phase:"labo", r:TOURS, reste: FINAL - l, key:"labo" }
+      : { phase:"revelation", r:TOURS, reste:0, key:"revelation" };
+  }
   const w = t - r * cycle;
   return w < TRAJET
     ? { phase:"trajet",  r, reste: TRAJET - w, key:"t" + r }
     : { phase:"epreuve", r, reste: cycle - w,  key:"e" + r };
 }
 function clockText(h){
-  if(h.phase === "labo") return "🧬 Toutes les épreuves sont finies · direction le labo";
+  if(h.phase === "revelation") return "🦕 Le Diegosaurus Rex est localisé !";
+  if(h.phase === "labo") return "🧬 Tous devant la maison · révélation dans <b>" + mmss(h.reste) + "</b>";
   const e = EPREUVES[ordre()[h.r]];
   return h.phase === "trajet"
     ? "🚶 Trajet vers " + e.court + " · <b>" + mmss(h.reste) + "</b>"
@@ -752,6 +813,7 @@ document.addEventListener("visibilitychange", () => { if(document.visibilityStat
 
 /* Aller sur l'écran qui correspond au moment de la partie */
 function allerPhase(h){
+  if(h.phase === "revelation") return openReveal(true);
   if(h.phase === "epreuve"){
     openPuzzle(ordre()[h.r]);
     return flash(document.getElementById("msg-chrono"), "🟢 C'est parti ! L'épreuve commence maintenant.", true);
@@ -761,16 +823,21 @@ function allerPhase(h){
 /* Test : avancer l'horloge jusqu'à la fin de la phase en cours */
 function sauterPhase(){
   const h = horloge();
-  if(!h || h.phase === "labo") return;
+  if(!h || h.phase === "revelation") return;
   state.top -= h.reste * 1000; save();
   tick();
 }
-function tick(){
+function majBoutonTest(){
   const skip = document.getElementById("btn-skip"), h0 = horloge();
-  skip.style.display = h0 && h0.phase !== "labo" && !state.fin ? "inline-block" : "none";
-  if(h0) skip.textContent = h0.phase === "trajet" ? "⏩ Fin de la minute (test)" : "⏩ Fin des " + duree(DUREE) + " (test)";
+  skip.style.display = h0 && h0.phase !== "revelation" && !state.fin ? "inline-block" : "none";
+  if(h0) skip.textContent = h0.phase === "labo" ? "⏩ Aller à la révélation (test)"
+    : h0.phase === "trajet" ? "⏩ Fin de la minute (test)" : "⏩ Fin des " + duree(DUREE) + " (test)";
+}
+function tick(){
+  majBoutonTest();
   if(!state || !state.top || state.fin) return;
   const h = horloge();
+  if(h.phase === "revelation" && lastKey === null){ lastKey = h.key; return openReveal(false); }
   ["clock-map","clock-found"].forEach(id => document.getElementById(id).innerHTML = clockText(h));
 
   // chrono de l'écran d'épreuve
@@ -782,7 +849,8 @@ function tick(){
     document.getElementById("pz-time").textContent = mmss(h.reste);
   }
   // compte à rebours du trajet
-  document.getElementById("mv-time").textContent = mmss(h.phase === "trajet" ? h.reste : 0);
+  document.getElementById("mv-time").textContent = mmss(h.phase === "trajet" || h.phase === "labo" ? h.reste : 0);
+  document.getElementById("lab-time").textContent = mmss(h.phase === "labo" ? h.reste : 0);
 
   if(h.key !== lastKey){
     const premier = lastKey === null;
@@ -810,7 +878,7 @@ function nextIntro(){
     b.style.borderColor = t.couleur;
     const e = EPREUVES[t.ordre[0]];
     b.innerHTML = '<span class="row"><span class="ico">' + t.ico + '</span><span class="txt"><span class="nm">' + t.nom +
-      '</span><span class="zn">Départ : ' + e.court + ' · ' + e.zone + '</span></span></span>';
+      '</span><span class="zn">Départ : ' + e.court + ' · 📍 ' + (e.lieu || e.zone) + '</span></span></span>';
     b.onclick = () => chooseTeam(k);
     box.appendChild(b);
   });
@@ -866,7 +934,7 @@ function showMap(){
     step.className = "step " + etat + (lab ? " lab" : "");
     const dot = '<span class="dot">' + (etat === "done" ? "✓" : pos+1) + '</span>';
     const nom = etat === "off" ? "???" : e.court;
-    const zone = etat === "off" ? "Piste encore inconnue" : e.zone;
+    const zone = etat === "off" ? "Piste encore inconnue" : ou(e);
     const badge = etat === "done" ? '<span class="st safe">' + e.preuve.ico + ' Trouvé</span>'
                 : etat === "now"  ? '<span class="st go">' + (h.phase === "trajet" ? "Prochaine" : "En cours") + '</span>'
                 : etat === "late" ? '<span class="st lock">Indice manquant</span>'
@@ -907,7 +975,7 @@ function openPuzzle(i, trouve){
   document.getElementById("pz-num").textContent = pos + 1;
   document.getElementById("pz-ico").textContent = e.ico;
   document.getElementById("pz-name").textContent = e.nom;
-  document.getElementById("pz-zone").textContent = e.zone;
+  document.getElementById("pz-zone").textContent = ou(e);
   document.getElementById("pz-radio").innerHTML = cherche ? radio([e.cherche.texte], e.cherche.voix) : radio([e.arrivee], e.voix);
   document.getElementById("pz-hint").innerHTML = regles(cherche ? e.cherche.mission : e.indice);
   document.getElementById("lbl-code").textContent = e.label || "Code de déverrouillage";
@@ -1024,9 +1092,10 @@ function openMove(){
   document.getElementById("mv-tag").textContent = labo ? "🧬 Toutes les épreuves sont finies !" : h.r === 0 ? "🚀 C'est parti !" : "🔔 Changement d'épreuve !";
   document.getElementById("mv-ico").textContent = dest.ico;
   document.getElementById("mv-name").textContent = dest.nom;
-  document.getElementById("mv-zone").textContent = dest.zone;
+  document.getElementById("mv-zone").textContent = ou(dest);
   document.getElementById("mv-radio").innerHTML = radio([dest.route]);
-  document.getElementById("mv-chrono").style.display = labo ? "none" : "flex";
+  document.getElementById("mv-chrono").style.display = "flex";
+  document.getElementById("mv-chrono-l").textContent = labo ? "Révélation commune dans" : "Départ de l'épreuve dans";
   document.getElementById("mv-stop").style.display = labo ? "none" : "block";
 
   // épreuve précédente pas réussie ? On peut encore récupérer l'indice ici
@@ -1091,7 +1160,7 @@ function openFound(i){
    LABO : identifier le Diegosaurus Rex, puis radar (code maître)
    ============================================================ */
 function openLab(){
-  if(horloge().phase !== "labo") return showMap();
+  if(!["labo","revelation"].includes(horloge().phase)) return showMap();
   if(nbFaits() < EPREUVES.length) return showMap();   // indices manquants : le parcours indique lesquels
   document.getElementById("lab-intro").innerHTML = radio(LAB_INTRO);
   document.getElementById("lab-proofs").innerHTML = proofsHTML();
@@ -1106,6 +1175,10 @@ function openLab(){
   document.getElementById("msg-accuse").classList.remove("show");
   document.getElementById("lab-verdict").innerHTML = radio([VERDICT]);
   labStep(state.identifie);
+  document.getElementById("btn-adn").style.display = "block";
+  document.getElementById("adn").style.display = "none";
+  document.getElementById("lab-wait").style.display = "none";
+  if(state.adn) afficherAttente();
   show("scr-lab");
 }
 function labStep(trouve){
@@ -1119,17 +1192,74 @@ function accuse(s, b){
   labStep(true);
   window.scrollTo(0,0);
 }
-function submitFinal(){
-  state.fin = Date.now(); save();
-  showWin();
+/* Analyse ADN : une petite animation, puis on attend la révélation commune */
+const ETAPES_ADN = [
+  "Extraction de l'ADN du biberon…",
+  "Mesure de l'empreinte : pointure 21…",
+  "Décodage du rapport secret des parents…",
+  "Analyse de la bave sur la télécommande…",
+  "Comparaison avec la base du parc…"
+];
+function afficherAttente(){
+  document.getElementById("btn-adn").style.display = "none";
+  document.getElementById("adn").style.display = "none";
+  document.getElementById("lab-wait").style.display = "block";
 }
-function showWin(){
-  if(state.top && state.fin){
-    const min = Math.round((state.fin - state.top) / 60000);
-    document.getElementById("lbl-chrono").textContent = "Retrouvé en " + min + " minute" + (min > 1 ? "s" : "");
-  }
+function analyseADN(){
+  document.getElementById("btn-adn").style.display = "none";
+  document.getElementById("adn").style.display = "block";
+  const fill = document.getElementById("adn-fill"), pct = document.getElementById("adn-pct"), step = document.getElementById("adn-step");
+  const total = 7000, t0 = Date.now();
+  const anim = setInterval(() => {
+    const x = Math.min(1, (Date.now() - t0) / total);
+    fill.style.width = (x * 100) + "%";
+    pct.textContent = Math.floor(x * 100) + " %";
+    step.textContent = ETAPES_ADN[Math.min(ETAPES_ADN.length - 1, Math.floor(x * ETAPES_ADN.length))];
+    if(x >= 1){
+      clearInterval(anim);
+      state.adn = true; save();
+      afficherAttente();
+    }
+  }, 80);
+}
+
+/* ============================================================
+   LA GRANDE RÉVÉLATION — sur les 4 téléphones en même temps
+   ============================================================ */
+const RADAR = [
+  "📡 Radar activé…",
+  "📡 Signal détecté !",
+  "📡 Distance : 50 mètres…",
+  "📡 Distance : 10 mètres…",
+  "📡 Distance : 2 mètres…",
+  "📡 IL EST JUSTE LÀ !"
+];
+function bilan(){
+  const gagnes = EPREUVES.filter((e,i) => state.ok && state.ok[i] && !(state.gages && state.gages[i] !== undefined)).length;
+  const gages = Object.keys(state.gages || {}).length;
+  const titre = gagnes === 4 ? "🥇 Rangers d'élite"
+              : gagnes === 3 ? "🥈 Rangers confirmés"
+              : gagnes === 2 ? "🥉 Rangers en formation"
+              :                "🦖 Stagiaires du T-Rex";
+  const t = EQUIPES[state.equipe];
+  document.getElementById("rv-team").innerHTML = t.ico + ' <span style="color:' + t.couleur + '">' + t.nom + '</span>';
+  document.getElementById("rv-titre").textContent = titre;
+  document.getElementById("rv-stats").innerHTML =
+    "<div><b>" + gagnes + "/4</b><span>épreuves gagnées</span></div>" +
+    "<div><b>" + gages + "</b><span>gage" + (gages > 1 ? "s" : "") + " fait" + (gages > 1 ? "s" : "") + "</span></div>";
+}
+function openReveal(anime){
+  state.fin = state.fin || Date.now(); save();
+  bilan();
+  const radar = document.getElementById("rv-radar"), fin = document.getElementById("rv-fin");
   show("scr-win");
+  if(!anime){ radar.style.display = "none"; fin.style.display = "block"; return; }
+  radar.style.display = "flex"; fin.style.display = "none";
+  const txt = document.getElementById("rv-radar-t");
+  RADAR.forEach((l,k) => setTimeout(() => { txt.textContent = l; alerte(); }, k * 1400));
+  setTimeout(() => { radar.style.display = "none"; fin.style.display = "block"; alerte(); }, RADAR.length * 1400 + 400);
 }
+function showWin(){ openReveal(false); }
 
 /* ============================================================
    LES ÉNIGMES DU DRESSEUR (façon Père Fouras)
@@ -1209,13 +1339,14 @@ document.addEventListener("keydown", e => {
 state = load();
 if(state && (!(state.equipe in EQUIPES) || !state.ok)) state = null;
 if(!state) renderIntro();
-else if(state.fin) showWin();
+else if(state.fin) openReveal(false);
 else if(!state.top) showTop();
 else {
   const h = horloge();
   lastKey = h.key;
   garderEcran();
-  if(h.phase === "epreuve") reussi(ordre()[h.r]) ? showMap() : openPuzzle(ordre()[h.r]);
+  if(h.phase === "revelation") openReveal(false);
+  else if(h.phase === "epreuve") reussi(ordre()[h.r]) ? showMap() : openPuzzle(ordre()[h.r]);
   else openMove();
 }
 </script>
