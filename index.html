@@ -457,7 +457,7 @@ button.son.off{border-color:var(--jungle-600);opacity:.8}
 <div class="wrap">
 
 <!-- Ambiance sonore de la jungle (générée par l'app) : bouton pour couper / remettre -->
-<button class="son" id="btn-son" onclick="basculerSon()" aria-label="Couper ou remettre le son">🔊</button>
+<button class="son" id="btn-son" onclick="basculerSon()" aria-label="Couper ou remettre le son" style="display:none">🔊</button>
 
 <!-- Animation de départ d'épreuve : la mâchoire du dino -->
 <div class="chomp" id="chomp" aria-hidden="true">
@@ -1158,7 +1158,8 @@ function basculerSon(){
   majBoutonSon();
 }
 // le son ne peut démarrer qu'après un premier appui (règle des navigateurs)
-document.addEventListener("pointerdown", e => { if(e.target.id !== "btn-son") demarrerAmbiance(); });
+const AMBIANCE_ACTIVE = false;   // coupée : à réactiver quand on aura de vrais sons
+if(AMBIANCE_ACTIVE) document.addEventListener("pointerdown", e => { if(e.target.id !== "btn-son") demarrerAmbiance(); });
 document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && ac && ac.state === "suspended") ac.resume(); });
 
 /* ============================================================
