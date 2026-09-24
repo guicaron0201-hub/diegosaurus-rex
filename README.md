@@ -1,78 +1,101 @@
 # 🦕 Le Parc de Diego
 
-App web d'escape game créée pour les 1 an de Diego — thème dinosaures / parc d'attractions.
-~30 invités, 5-6 équipes, jeu en extérieur (jardin, pétanque, forêt).
+Jeu d'aventure sur téléphone pour le 1er anniversaire de Diego, entre amis (adultes).
+4 équipes, 4 épreuves en rotation dans le jardin, puis une enquête finale pour retrouver
+la nouvelle espèce échappée du parc… le **Diegosaurus Rex**.
 
-Ce dépôt est prévu pour être développé avec **Claude Code**. Ce README sert de brief à donner
-directement à Claude Code pour démarrer le projet. Voir aussi `GAME_DESIGN.md` pour le contenu
-du jeu (énigmes, codes, scénario).
+👉 **Jeu en ligne : https://guicaron0201-hub.github.io/diegosaurus-rex/**
+
+Tout le jeu tient dans un seul fichier, [`index.html`](index.html) : pas de serveur,
+pas de compte, la progression est gardée sur chaque téléphone.
 
 ---
 
-## 1. Contexte & objectif
+## L'histoire
 
-Le système de sécurité du parc a lâché. Chaque équipe doit parcourir 3 enclos (zones du terrain),
-résoudre une énigme par enclos pour obtenir un code, puis débloquer le "labo génétique" final
-qui annonce que le parc est sécurisé — signal pour passer au gâteau.
+Ornella, directrice du parc, annonce que le labo a vu naître il y a un an une espèce
+toute nouvelle, encore sans nom. Cette nuit, les clôtures ont lâché et le petit s'est
+échappé. Les équipes doivent réussir 4 épreuves pour rassembler 4 indices sur lui,
+puis l'identifier au labo génétique.
 
-Un adulte (le papa) joue le rôle du T-Rex en costume dans la zone forêt, en interaction physique
-avec les équipes (voir `GAME_DESIGN.md`).
+Le nom « Diegosaurus Rex » n'apparaît qu'à la toute fin, dans la liste des suspects.
 
-## 2. Fonctionnalités attendues (MVP)
+## Déroulé d'une partie (≈ 45 min)
 
-- [ ] Page de connexion par équipe (nom d'équipe + code d'équipe)
-- [ ] Carte du parc avec 3 enclos, statut sécurisé / non sécurisé, compteur de progression
-- [ ] Écran énigme par enclos : indice affiché + champ de saisie de code + validation
-- [ ] Écran final "système réactivé" quand les 3 enclos sont faits
-- [ ] Progression persistante et partagée par équipe (si plusieurs membres d'une équipe
-      ouvrent l'app sur leur téléphone, ils voient la même progression)
-- [ ] Responsive mobile en priorité (le jeu se joue sur téléphone, en extérieur)
+1. **Prologue** (3 écrans), puis **choix de l'équipe**.
+2. **Top départ commun** : au signal d'Ornella, les 4 équipes appuient sur « TOP » en même
+   temps. Chaque téléphone calcule ensuite seul le tour en cours, ils restent synchronisés.
+3. **4 tours**, chacun composé de :
+   - **1 minute d'attente** : on rejoint le lieu et on lit les règles, une barre se remplit ;
+   - **10 minutes d'épreuve** : l'épreuve démarre toute seule avec l'animation « CHOMP ! ».
+   Entre deux épreuves, on revient au **tableau de bord « Notre parcours »**.
+4. **Le labo** (sans chrono) : l'équipe compare ses 4 indices à une **liste de 5 suspects**.
+5. **La révélation** : analyse ADN → radar → « On l'a retrouvé ! Il était dans la cuisine
+   en train de piquer des parts de son gâteau » avec la photo de Diego, puis
+   « Rejoignez le Diegosaurus Rex pour souffler sa première bougie ».
 
-## 3. Fonctionnalités "si le temps le permet"
+## Les 4 épreuves
 
-- [ ] Scan de QR code (un QR code par enclos, redirige directement vers l'énigme correspondante)
-- [ ] Galerie photo : upload d'une photo "preuve de mission" à chaque enclos réussi, visible
-      par tous en fin de partie
-- [ ] Classement / timer live entre équipes
-- [ ] Écran admin simple pour suivre la progression de toutes les équipes en direct
+| Épreuve | Lieu (réel) | Maître du jeu | Le jeu | Indice gagné |
+|---|---|---|---|---|
+| 🦏 Le défi d'Alain | Terrain de pétanque | Alain le Tricératops | L'équipe tire 5 boules, Alain 3. La plus proche du cochonnet gagne. Une victoire suffit. | 🍼 Un biberon |
+| 🔤 Le mot secret de la Serre | Le jardin | aucun | 6 lettres cachées (à laisser en place). On les note dans l'app et on devine le mot **ÉCLORE**. | 👣 Empreinte pointure 21 |
+| 🎯 L'antre du T-Rex | La forêt | Le Dresseur du T-Rex | 5 fléchettes chacun, le plus gros total gagne. Une victoire suffit. | 🌙 Le rapport secret des parents |
+| 🏓 Le Dino-pong d'Ornella | Table de ping-pong | Ornella | Pong contre Ornella : un joueur qui marque sort. Le plus de verres en 10 min gagne. | 📱 Une télécommande mâchouillée |
 
-## 4. Stack technique suggérée
+Pour les 3 duels, l'équipe appuie sur **🏆 Gagné** ou **💀 Perdu**. Perdu → l'app affiche
+le gage (chacun imite le cri d'un dinosaure), puis « Gage fait » donne quand même l'indice.
 
-- Frontend simple : HTML/CSS/JS, ou React si Claude Code préfère (pas de besoin de complexité)
-- Stockage : pas de backend dédié nécessaire dans un premier temps — privilégier une solution
-  simple (ex. stockage clé-valeur type Supabase, ou équivalent léger) pour la progression
-  partagée par équipe et les photos
-- Déploiement : Netlify, Vercel ou GitHub Pages (statique + petite base de données si besoin)
-- Pas d'authentification complexe : un simple code d'équipe suffit
+## Les 4 équipes et la rotation
 
-## 5. Contenu du jeu
+| Équipe | Tour 1 | Tour 2 | Tour 3 | Tour 4 |
+|---|---|---|---|---|
+| 🌋 Les Volcanosaures | Pétanque | Lettres | Fléchettes | Dino-pong |
+| 🌊 Les Aquaraptors | Lettres | Fléchettes | Dino-pong | Pétanque |
+| 🌿 Les Jungle-Rex | Fléchettes | Dino-pong | Pétanque | Lettres |
+| ⚡ Les Ptéro-Éclairs | Dino-pong | Pétanque | Lettres | Fléchettes |
 
-Voir `GAME_DESIGN.md` pour :
-- Le scénario complet
-- Les 3 enclos, leurs indices et leurs codes
-- Le rôle du T-Rex (papa en costume)
-- Le matériel à imprimer
+À chaque tour, chaque épreuve accueille exactement une équipe.
 
-## 6. Prototype existant
+## Tester
 
-Un premier prototype visuel (HTML statique, un seul fichier) existe déjà et peut servir de base
-de design : palette jungle/ambre, typographie façon caisse d'expédition/parc naturel, écrans
-login → carte → énigme → final. À réutiliser ou retravailler librement.
+```bash
+node serve.js
+```
 
-## 7. Plan de développement suggéré pour Claude Code
+Puis ouvrir http://localhost:4173 (sur téléphone : l'adresse affichée dans le terminal,
+même wifi).
 
-1. Reprendre ou reconstruire les 4 écrans (login, carte, énigme, final) à partir du style du
-   prototype
-2. Brancher un vrai code d'équipe différent par équipe (actuellement un seul code de démo)
-3. Ajouter le stockage partagé de la progression par équipe
-4. Ajouter la génération/lecture de QR codes par enclos
-5. Ajouter l'upload photo si le temps le permet
-6. Tester sur mobile en conditions réelles (extérieur, plein soleil, réseau faible)
-7. Déployer et générer les supports à imprimer (QR codes, fiches de mission)
+- **Boutons de test** en bas des écrans : ⏩ saute la fin de la minute ou des 10 minutes,
+  🔄 redémarre la partie.
+- **`?test`** à la fin de l'adresse : partie accélérée (épreuves de 40 s, trajets de 15 s).
 
-## 8. Contraintes pratiques
+## Réglages (dans `index.html`)
 
-- Jeu en extérieur, prévoir un mode qui fonctionne même avec un réseau mobile faible
-- Testé pour être utilisable par des enfants et des adultes (langage simple dans les énigmes)
-- Doit rester utilisable même si une équipe se retrouve sans réseau un instant (éviter de tout
-  perdre en cas de coupure)
+| Constante | Rôle |
+|---|---|
+| `BOUTON_TEST` | `true` = boutons de test visibles. **Passer à `false` le jour J.** |
+| `DUREE` | Durée d'une épreuve (10 min). |
+| `TRAJET` | Temps d'attente avant chaque épreuve (1 min). |
+| `EPREUVES` | Textes, règles et indices de chaque épreuve. |
+| `EQUIPES` | Noms, couleurs et ordre de passage des équipes. |
+| `SUSPECTS` | La liste des suspects du labo. |
+| `GAGES` | Le(s) gage(s) donné(s) après une défaite. |
+
+La photo de la révélation est [`diego.jpg`](diego.jpg) (version allégée de l'originale,
+qui reste hors du dépôt).
+
+## À imprimer (dossier `print/`)
+
+| Fichier | Contenu |
+|---|---|
+| `qr-code-A5.pdf` | Affiche « Scannez pour jouer » avec le QR code du jeu. |
+| `lettres-A5.pdf` | Les 6 lettres É · C · L · O · R · E à cacher dans le jardin. |
+| `etiquettes-A4.pdf` | Étiquettes du buffet, toutes sur une feuille A4. |
+
+Impression : format indiqué, sans marges, en cochant « graphiques d'arrière-plan ».
+
+## Mise en ligne
+
+Le site est publié par GitHub Pages depuis la branche `main` : chaque envoi sur `main`
+met le jeu en ligne en une minute environ.
