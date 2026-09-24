@@ -352,6 +352,26 @@ button.reset{
 .bandeau-libre{position:relative;z-index:7;padding:7px 12px;background:#3a1712;color:#FF9E88;font-size:12px;font-weight:700;text-align:center}
 .testbar.libre{position:sticky;bottom:0;z-index:8;margin:24px -16px 0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(11,22,15,.94);border-top:1px solid var(--jungle-600)}
 .testbar.libre #btn-skip{font-size:14px;padding:13px 18px;background:var(--amber);color:#241a06;border:0}
+
+/* ---------- duel : Gagné / Perdu ---------- */
+.duel{display:flex;gap:10px;margin-top:14px}
+.duel button{flex:1;margin:0;padding:20px 8px;font-size:18px}
+.duel .win{background:var(--ok);color:#10200f;box-shadow:0 4px 0 #3f7a42}
+.duel .lose{background:var(--danger);color:#fff;box-shadow:0 4px 0 #7d2514}
+#mv-late-btn button{margin-top:10px}
+.rule-sub{margin:16px 0 8px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+
+/* ---------- bouton « Lancer l'épreuve » qui se remplit ---------- */
+.launch-wrap{position:sticky;bottom:10px;z-index:4;margin-top:16px}
+body.libre .launch-wrap{bottom:132px}
+button.launch{position:relative;overflow:hidden;margin:0;padding:19px;font-size:16px;
+  background:var(--jungle-900);color:var(--bone-dim);border:2px solid var(--amber);box-shadow:0 6px 18px rgba(0,0,0,.5)}
+button.launch .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(232,163,61,.35),rgba(232,163,61,.7));transition:width 1s linear}
+button.launch .lbl{position:relative}
+button.launch:disabled{cursor:default;transform:none}
+button.launch.pret{background:var(--ok);border-color:var(--ok);color:#10200f;animation:pouls 1.1s ease-in-out infinite}
+button.launch.pret .fill{display:none}
+@keyframes pouls{50%{transform:scale(1.03)}}
 </style>
 </head>
 <body>
@@ -451,8 +471,11 @@ button.reset{
       <button id="btn-code" onclick="submitCode()">Valider le code</button>
       <div id="msg-puzzle" class="msg"></div>
     </div>
-    <button class="start" id="pz-win" onclick="duelFini()">🏆 Réussi ! Découvrir l'indice</button>
-    <button class="ghost" id="pz-gagefait" onclick="duelFini(true)">✅ Gage fait : découvrir l'indice</button>
+    <div class="duel" id="pz-duel">
+      <button class="win" id="pz-win" onclick="duelFini()">🏆 Gagné</button>
+      <button class="lose" id="pz-lose" onclick="duelPerdu()">💀 Perdu</button>
+    </div>
+    <button class="start" id="pz-gagefait" onclick="duelFini(true)">✅ Gage fait : découvrir l'indice</button>
     <button class="alarm" id="pz-trex" onclick="startRiddles()">🦖 Affronter le Dresseur</button>
     <button id="pz-seek" onclick="openPuzzle(current, true)">🔍 On l'a trouvé !</button>
   </div>
@@ -513,6 +536,12 @@ button.reset{
     <p class="stop" id="mv-stop">⛔ Rejoignez l'épreuve, mais <strong>ne commencez pas avant la fin du compte à rebours</strong>. Le téléphone vous dira quand c'est parti !</p>
     <div class="radio" id="mv-radio"></div>
 
+    <!-- la prochaine épreuve : description + règles, à lire pendant la minute d'attente -->
+    <div id="mv-epreuve">
+      <div class="radio" id="mv-arrivee"></div>
+      <div class="hint"><b>Les règles</b><div id="mv-regles"></div></div>
+    </div>
+
     <!-- l'équipe n'a pas réussi l'épreuve précédente : bouton « gage fait » (duels) ou mot secret (lettres) -->
     <div id="mv-late" class="late">
       <b id="mv-late-t"></b>
@@ -523,11 +552,19 @@ button.reset{
         <input id="inp-late" type="text" maxlength="20" autocapitalize="characters" placeholder="????" autocomplete="off" spellcheck="false">
         <button onclick="submitLate()">Récupérer l'indice</button>
       </div>
-      <button id="mv-late-btn" onclick="lateGage()">✅ Gage fait : découvrir l'indice</button>
+      <div id="mv-late-btn">
+        <button onclick="lateGagne()">🏆 On a gagné juste à temps</button>
+        <button class="ghost" onclick="lateGage()">✅ Gage fait : découvrir l'indice</button>
+      </div>
       <div id="msg-late" class="msg"></div>
     </div>
 
-    <button id="mv-go" onclick="goMove()">📖 Lire les règles en attendant</button>
+    <button id="mv-go" onclick="goMove()">Nous sommes au labo →</button>
+    <div class="launch-wrap" id="mv-launch">
+      <button class="launch" id="mv-start" onclick="lancerEpreuve()" disabled>
+        <span class="fill" id="mv-fill"></span><span class="lbl" id="mv-start-t">⏳ Lancer l'épreuve</span>
+      </button>
+    </div>
   </div>
 </section>
 
@@ -631,8 +668,8 @@ const EPREUVES = [
         "Votre équipe tire <strong>5 boules</strong>.",
         "Alain tire ensuite <strong>3 boules</strong> pour vous battre.",
         "La boule la plus proche du cochonnet remporte la manche." ],
-      gagner:"Vous remportez une manche ? Appuyez sur <strong>« 🏆 Réussi ! Découvrir l'indice »</strong>. Une seule victoire suffit… mais Alain est très fort ! S'il gagne, on rejoue une manche.",
-      sinon:"Chrono à zéro sans victoire : l'app vous donne un gage. Une fois le gage fait, appuyez sur <strong>« ✅ Gage fait : découvrir l'indice »</strong>." },
+      gagner:"Vous remportez une manche ? Appuyez sur <strong>« 🏆 Gagné »</strong> pour découvrir l'indice. Une seule victoire suffit… mais Alain est très fort ! S'il gagne, on rejoue une manche tant qu'il reste du temps.",
+      sinon:"Plus le temps de rejouer, ou vous jetez l'éponge ? Appuyez sur <strong>« 💀 Perdu »</strong> : l'app vous donne votre gage." },
     preuve:{ ico:"🍼", nom:"Un biberon", court:"Biberon",
       texte:"Alain vous tend ce que le petit a oublié dans son enclos : un biberon encore tiède, avec des traces de dents sur la tétine. Vide, évidemment. D'après Alain, le Diegosaurus Rex en réclame un toutes les trois heures, en hurlant plus fort qu'un T-Rex… y compris à 4 h du matin. Conclusion : il boit encore du lait, et il sait se faire entendre." } },
 
@@ -665,8 +702,8 @@ const EPREUVES = [
         "Votre équipe lance <strong>5 fléchettes</strong> et additionne ses points.",
         "Le Dresseur lance ensuite ses <strong>5 fléchettes</strong>.",
         "Le plus gros total remporte la manche." ],
-      gagner:"Vous remportez une manche ? Appuyez sur <strong>« 🏆 Réussi ! Découvrir l'indice »</strong>. Une seule victoire suffit… mais il est redoutable ! S'il gagne, on rejoue une manche.",
-      sinon:"Chrono à zéro sans victoire : l'app vous donne un gage. Une fois le gage fait, appuyez sur <strong>« ✅ Gage fait : découvrir l'indice »</strong>." },
+      gagner:"Vous remportez une manche ? Appuyez sur <strong>« 🏆 Gagné »</strong> pour découvrir l'indice. Une seule victoire suffit… mais il est redoutable ! S'il gagne, on rejoue une manche tant qu'il reste du temps.",
+      sinon:"Plus le temps de rejouer, ou vous jetez l'éponge ? Appuyez sur <strong>« 💀 Perdu »</strong> : l'app vous donne votre gage." },
     preuve:{ ico:"🌙", nom:"Le rapport secret des parents", court:"Rapport",
       texte:"Le Dresseur s'incline et vous tend un dossier que son T-Rex a déterré : « Rapport confidentiel des parents du Diegosaurus Rex ». Nuits complètes depuis sa naissance : 0. Réveils par nuit : entre 2 et 11. Heure de réveil préférée : 5 h 47. Cafés bus par les parents : 1 247, et le compteur tourne encore. Berceuse chantée pour l'endormir : toujours la même, environ 3 000 fois. Conclusion du rapport : l'espèce ne dort jamais… mais elle est adorable." } },
 
@@ -677,9 +714,9 @@ const EPREUVES = [
         "Votre équipe et Ornella lancent <strong>en même temps</strong> dans les verres d'en face.",
         "Un joueur qui met une balle <strong>sort du jeu</strong> : ses coéquipiers continuent.",
         "À la fin des 10 minutes, on compte les verres de chaque côté." ],
-      gagner:"Plus de verres qu'Ornella ? Appuyez sur <strong>« 🏆 Réussi ! Découvrir l'indice »</strong>.",
-      sinon:"Moins de verres qu'Ornella : l'app vous donne un gage. Une fois le gage fait, appuyez sur <strong>« ✅ Gage fait : découvrir l'indice »</strong>." },
-    finChrono:"⏰ Fin du match ! Comptez les verres. Plus qu'Ornella ? Appuyez sur « 🏆 Réussi ! Découvrir l'indice ». Sinon… faites votre gage, puis appuyez sur « ✅ Gage fait : découvrir l'indice ».",
+      gagner:"Plus de verres qu'Ornella ? Appuyez sur <strong>« 🏆 Gagné »</strong> pour découvrir l'indice.",
+      sinon:"Moins de verres qu'Ornella ? Appuyez sur <strong>« 💀 Perdu »</strong> : l'app vous donne votre gage." },
+    finChrono:"⏰ Fin du match ! Comptez les verres : plus qu'Ornella ? Appuyez sur « 🏆 Gagné ». Sinon, faites votre gage et appuyez sur « ✅ Gage fait ».",
     preuve:{ ico:"📱", nom:"Une télécommande mâchouillée", court:"Télécommande",
       texte:"Beau joueur, Ornella vous montre ce qu'elle a trouvé sous son bureau : une télécommande entièrement mâchouillée, trempée de bave, avec les touches 4, 7 et « Volume + » arrachées. Le Diegosaurus Rex a une passion dans la vie : tout ce qui n'est pas un jouet. Clés, téléphones, chaussures, câbles… Plus c'est interdit, plus c'est délicieux." } }
 ];
@@ -848,8 +885,12 @@ document.addEventListener("visibilitychange", () => { if(document.visibilityStat
 function allerPhase(h){
   if(h.phase === "revelation") return openReveal(true);
   if(h.phase === "epreuve"){
-    openPuzzle(ordre()[h.r]);
-    return flash(document.getElementById("msg-chrono"), "🟢 C'est parti ! L'épreuve commence maintenant.", true);
+    // déjà sur l'épreuve (règles ouvertes depuis le parcours) : on l'actualise
+    if(document.getElementById("scr-puzzle").classList.contains("on") && current === ordre()[h.r]){
+      openPuzzle(current);
+      return flash(document.getElementById("msg-chrono"), "🟢 C'est parti ! L'épreuve commence maintenant.", true);
+    }
+    return openMove();   // sinon : écran d'attente, le bouton « Lancer l'épreuve » devient vert
   }
   openMove();
 }
@@ -887,6 +928,7 @@ function tick(){
   // compte à rebours du trajet
   document.getElementById("mv-time").textContent = mmss(h.phase === "trajet" || h.phase === "labo" ? h.reste : 0);
   document.getElementById("lab-time").textContent = mmss(h.phase === "labo" ? h.reste : 0);
+  majLancer(h);
 
   if(h.key !== lastKey){
     const premier = lastKey === null;
@@ -1020,8 +1062,10 @@ function openPuzzle(i, trouve){
   document.getElementById("pz-seek").style.display = cherche && !reussi(i) ? "block" : "none";
   const duel = e.type === "duel";
   document.getElementById("pz-code").style.display = jouable && !duel && !(enigmes && !retard) ? "block" : "none";
-  document.getElementById("pz-win").style.display = jouable && duel ? "block" : "none";
-  document.getElementById("pz-gagefait").style.display = jouable && duel && retard ? "block" : "none";
+  const perdu = !!(state.perdu && state.perdu[i]);
+  document.getElementById("pz-duel").style.display = jouable && duel && !perdu ? "flex" : "none";
+  document.getElementById("pz-lose").style.display = retard ? "none" : "block";   // chrono fini : le gage est déjà là
+  document.getElementById("pz-gagefait").style.display = jouable && duel && (perdu || retard) ? "block" : "none";
   document.getElementById("pz-letters").style.display = e.type === "lettres" && (jouable || reussi(i)) ? "block" : "none";
   if(e.type === "lettres") renderLetters(i, reussi(i));
   document.getElementById("btn-code").textContent = e.type === "lettres" ? "Valider" : "Valider le code";
@@ -1032,7 +1076,7 @@ function openPuzzle(i, trouve){
   if(reussi(i)) flash(m, "✓ Épreuve déjà réussie !", true);
   else if(retard) flash(m, finTexte(i), false, true);
   else if(h.phase === "trajet" && h.r === pos) flash(m, "⛔ Ne commencez pas encore ! L'épreuve démarre à la fin du compte à rebours. Lisez les règles en attendant.", false, true);
-  montrerGage(document.getElementById("pz-gage"), retard ? i : null);
+  montrerGage(document.getElementById("pz-gage"), (retard || perdu) && !reussi(i) ? i : null);
 
   const inp = document.getElementById("inp-code");
   const code = e.code || "";
@@ -1056,10 +1100,21 @@ function duelFini(gage){
   const e = EPREUVES[current];
   if(!confirm(gage ? "Le gage est bien fait ?" : "Vous avez vraiment battu " + e.maitre + " ?")) return;
   flash(document.getElementById("msg-chrono"), gage ? "✓ Gage accompli !" : "🏆 Bravo, vous avez battu " + e.maitre + " !", true);
-  win(current);
+  win(current, gage);
 }
-function win(i){
+/* Duel perdu : l'app affiche le gage tout de suite */
+function duelPerdu(){
+  const e = EPREUVES[current];
+  if(!confirm("Vous avez perdu contre " + e.maitre + " ?")) return;
+  state.perdu = state.perdu || {};
+  state.perdu[current] = true; save();
+  openPuzzle(current, true);
+  document.getElementById("pz-gage").scrollIntoView({ behavior:"smooth", block:"center" });
+}
+function win(i, parGage){
+  state.gagne = state.gagne || {}; state.gageFait = state.gageFait || {};
   if(!reussi(i)){
+    (parGage ? state.gageFait : state.gagne)[i] = true;
     const h = horloge();
     state.ok = state.ok || {};
     state.temps = state.temps || {};
@@ -1072,7 +1127,7 @@ function win(i){
 /* Un gage par épreuve ratée, tiré au hasard une seule fois (il ne change pas au rechargement) */
 function finTexte(i){
   const e = EPREUVES[i];
-  return e.finChrono || "⏰ Temps écoulé ! Vous avez battu " + e.maitre + " juste à temps ? Appuyez sur « 🏆 Réussi ! Découvrir l'indice ». Sinon, faites votre gage puis appuyez sur « ✅ Gage fait : découvrir l'indice ».";
+  return e.finChrono || "⏰ Temps écoulé ! Vous avez battu " + e.maitre + " juste à temps ? Appuyez sur « 🏆 Gagné ». Sinon, faites votre gage et appuyez sur « ✅ Gage fait ».";
 }
 /* Affiche le gage de l'épreuve i dans l'encadré el (rien pour la chasse aux lettres) */
 function montrerGage(el, i){
@@ -1123,16 +1178,26 @@ function renderLetters(i, fini){
    ============================================================ */
 let lateIdx = null;
 function openMove(){
-  const h = horloge(), labo = h.phase === "labo";
+  const h = horloge(), labo = h.phase === "labo", enCours = h.phase === "epreuve";
   const dest = labo ? LABO : EPREUVES[ordre()[h.r]];
-  document.getElementById("mv-tag").textContent = labo ? "🧬 Toutes les épreuves sont finies !" : h.r === 0 ? "🚀 C'est parti !" : "🔔 Changement d'épreuve !";
+  document.getElementById("mv-tag").textContent = labo ? "🧬 Toutes les épreuves sont finies !"
+    : enCours ? "🟢 C'est parti !" : h.r === 0 ? "🚀 Première épreuve" : "🔔 Changement d'épreuve !";
   document.getElementById("mv-ico").textContent = dest.ico;
   document.getElementById("mv-name").textContent = dest.nom;
   document.getElementById("mv-zone").textContent = ou(dest);
   document.getElementById("mv-radio").innerHTML = radio([dest.route]);
   document.getElementById("mv-chrono").style.display = "flex";
-  document.getElementById("mv-chrono-l").textContent = labo ? "Révélation commune dans" : "Départ de l'épreuve dans";
-  document.getElementById("mv-stop").style.display = labo ? "none" : "block";
+  document.getElementById("mv-chrono-l").textContent = labo ? "Révélation commune dans" : enCours ? "Temps restant" : "Départ de l'épreuve dans";
+  document.getElementById("mv-stop").style.display = labo || enCours ? "none" : "block";
+
+  // la prochaine épreuve, à lire pendant l'attente (pour la forêt : d'abord trouver le Dresseur)
+  document.getElementById("mv-epreuve").style.display = labo ? "none" : "block";
+  if(!labo){
+    const c = dest.cherche;
+    document.getElementById("mv-arrivee").innerHTML = c ? radio([c.texte], c.voix) : radio([dest.arrivee], dest.voix);
+    document.getElementById("mv-regles").innerHTML = regles(c ? c.mission : dest.indice) +
+      (c ? '<p class="rule-sub">🎯 Une fois le Dresseur trouvé, le duel :</p>' + regles(dest.indice) : "");
+  }
 
   // épreuve précédente pas réussie ? On peut encore récupérer l'indice ici
   const prevPos = labo ? TOURS - 1 : h.r - 1;
@@ -1144,7 +1209,7 @@ function openMove(){
     document.getElementById("mv-late-t").textContent = "Pas encore d'indice pour « " + p.court + " » ?";
     document.getElementById("mv-late-p").textContent = finTexte(lateIdx);
     montrerGage(document.getElementById("mv-gage"), lateIdx);
-    document.getElementById("lbl-late").textContent = p.label || "Code";
+    document.getElementById("lbl-late").textContent = p.label || "Le mot secret";
     document.getElementById("inp-late").value = "";
     const duel = p.type === "duel";
     document.getElementById("mv-late-code").style.display = duel ? "none" : "block";
@@ -1154,14 +1219,40 @@ function openMove(){
     il.setAttribute("placeholder", "?".repeat(code.length));
     document.getElementById("msg-late").classList.remove("show");
   }
-  document.getElementById("mv-go").textContent = labo ? "Nous sommes au labo →" : "📖 Lire les règles en attendant";
+  document.getElementById("mv-go").style.display = labo ? "block" : "none";
+  document.getElementById("mv-launch").style.display = labo ? "none" : "block";
   show("scr-move");
   tick();
 }
-function goMove(){ const h = horloge(); h.phase === "labo" ? openLab() : openPuzzle(ordre()[h.r]); }
+/* Bouton « Lancer l'épreuve » : se remplit pendant la minute d'attente, cliquable à la fin */
+function majLancer(h){
+  const btn = document.getElementById("mv-start");
+  if(!btn || h.phase === "labo" || h.phase === "revelation") return;
+  const pret = h.phase === "epreuve";
+  const x = pret ? 1 : 1 - h.reste / TRAJET;
+  document.getElementById("mv-fill").style.width = (x * 100) + "%";
+  btn.disabled = !pret;
+  btn.classList.toggle("pret", pret);
+  document.getElementById("mv-start-t").textContent = pret ? "🟢 Lancer l'épreuve !" : "⏳ Lancer l'épreuve · " + mmss(h.reste);
+}
+function lancerEpreuve(){
+  const h = horloge();
+  if(h.phase !== "epreuve") return;
+  openPuzzle(ordre()[h.r]);
+  flash(document.getElementById("msg-chrono"), "🟢 C'est parti ! L'épreuve commence maintenant.", true);
+}
+function goMove(){ openLab(); }
+function lateGagne(){
+  if(!confirm("Vous avez vraiment battu " + EPREUVES[lateIdx].maitre + " ?")) return;
+  state.ok[lateIdx] = true;
+  state.gagne = state.gagne || {}; state.gagne[lateIdx] = true; save();
+  flash(document.getElementById("msg-late"), "🏆 Bravo !", true);
+  setTimeout(() => openFound(lateIdx), 700);
+}
 function lateGage(){
   if(!confirm("Le gage est bien fait ?")) return;
-  state.ok[lateIdx] = true; save();
+  state.ok[lateIdx] = true;
+  state.gageFait = state.gageFait || {}; state.gageFait[lateIdx] = true; save();
   flash(document.getElementById("msg-late"), "✓ Gage accompli !", true);
   setTimeout(() => openFound(lateIdx), 700);
 }
@@ -1170,7 +1261,8 @@ function submitLate(){
   const v = clean(document.getElementById("inp-late").value);
   if(!v) return flash(m, "Tapez le mot secret.");
   if(v !== clean(EPREUVES[lateIdx].code)) return flash(m, "Ce n'est pas le bon mot.");
-  state.ok[lateIdx] = true; save();
+  state.ok[lateIdx] = true;
+  state.gagne = state.gagne || {}; state.gagne[lateIdx] = true; save();
   flash(m, "✓ Indice récupéré !", true);
   setTimeout(() => openFound(lateIdx), 700);
 }
@@ -1271,8 +1363,8 @@ const RADAR = [
   "📡 IL EST JUSTE LÀ !"
 ];
 function bilan(){
-  const gagnes = EPREUVES.filter((e,i) => state.ok && state.ok[i] && !(state.gages && state.gages[i] !== undefined)).length;
-  const gages = Object.keys(state.gages || {}).length;
+  const gagnes = Object.keys(state.gagne || {}).length;
+  const gages = Object.keys(state.gageFait || {}).length;
   const titre = gagnes === 4 ? "🥇 Rangers d'élite"
               : gagnes === 3 ? "🥈 Rangers confirmés"
               : gagnes === 2 ? "🥉 Rangers en formation"
@@ -1362,6 +1454,7 @@ function skipRiddle(){
 if(!BOUTON_TEST && !LIBRE) document.getElementById("testbar").style.display = "none";
 if(LIBRE){
   document.getElementById("testbar").classList.add("libre");
+  document.body.classList.add("libre");
   document.body.insertAdjacentHTML("afterbegin", '<div class="bandeau-libre">🧪 Mode libre : le temps ne défile pas, avancez avec le bouton ⏩ en bas</div>');
 }
 
