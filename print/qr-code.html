@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>QR code — Le Parc de Diego</title>
+<!-- Affiche A5 pour ouvrir l'app en scannant le QR code.
+     PDF déjà généré : print/qr-code-A5.pdf (sinon Imprimer > A5 depuis Chrome, marges : aucune) -->
+<style>
+@page{size:A5 portrait;margin:0}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{margin:0;padding:0;background:#fff}
+@media screen{ body{background:#777} .page{margin:10mm auto} }
+.page{
+  width:148mm;height:210mm;margin:0 auto;overflow:hidden;background:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:8mm 0 7mm;
+  font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;color:#12241A;text-align:center
+}
+.tape{width:124mm;height:4mm;border-radius:1mm;background:repeating-linear-gradient(45deg,#E8A33D 0 5mm,#1a1a17 5mm 10mm)}
+.haut .logo{font-size:12mm;line-height:1}
+h1{margin:2mm 0 0;font-size:8mm;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#E8A33D;text-shadow:0 .6mm 0 #8f6412}
+.sous{margin:1.5mm 0 0;font-size:3.6mm;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#8f6412}
+.qr{width:96mm;height:96mm;padding:5mm;border:1.2mm solid #E8A33D;border-radius:5mm}
+.qr img{display:block;width:100%;height:100%}
+.appel{font-size:6.5mm;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.appel small{display:block;margin-top:1.5mm;font-size:3.6mm;font-weight:600;letter-spacing:0;text-transform:none;color:#555}
+.url{font-size:3.3mm;color:#8f6412;letter-spacing:.02em}
+</style>
+</head>
+<body>
+<section class="page">
+  <div class="tape"></div>
+  <div class="haut">
+    <div class="logo">🦕</div>
+    <h1>Le Parc de Diego</h1>
+    <div class="sous">Avis de recherche</div>
+  </div>
+  <div class="qr"><img src="qr-code.svg" alt="QR code du jeu"></div>
+  <div class="appel">📱 Scannez pour jouer
+    <small>Un téléphone par équipe · batterie bien chargée</small>
+  </div>
+  <div class="url">guicaron0201-hub.github.io/diegosaurus-rex</div>
+  <div class="tape"></div>
+</section>
+</body>
+</html>
