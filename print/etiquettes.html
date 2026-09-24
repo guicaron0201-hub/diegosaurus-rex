@@ -5,7 +5,7 @@
 <title>Étiquettes du buffet — Le Parc de Diego</title>
 <!-- 4 étiquettes chevalets sur une feuille A4 (2 × 2).
      Découper le long des pointillés gris, puis plier chaque étiquette en deux sur la ligne « pli » :
-     le texte est imprimé sur les deux moitiés (l'une tête en bas), l'étiquette se lit des deux côtés.
+     le texte est sur la moitié du bas ; la moitié du haut (blanche) sert de pied.
      PDF déjà généré : print/etiquettes-A4.pdf (sinon Imprimer > A4 depuis Chrome, marges : aucune) -->
 <style>
 @page{size:A4 portrait;margin:0}
@@ -43,9 +43,9 @@ html,body{margin:0;padding:0;background:#fff}
   ];
   const face = (e, cote) => '<div class="face ' + cote + '"><div class="tape"></div>' +
     '<h1 class="titre">' + e.titre + '</h1><p class="sous">' + e.sous + '</p>' +
-    '<div class="marque">Le Parc de Diego</div></div>';
+    '<div class="marque">🦕 Le Parc de Diego</div></div>';
   document.getElementById("page").innerHTML = ETIQUETTES.map(e =>
-    '<div class="etiquette">' + face(e, "haut") + face(e, "bas") + '<div class="pli"><span>pli</span></div></div>').join("");
+    '<div class="etiquette"><div class="face haut"></div>' + face(e, "bas") + '<div class="pli"><span>pli</span></div></div>').join("");
 </script>
 </body>
 </html>
