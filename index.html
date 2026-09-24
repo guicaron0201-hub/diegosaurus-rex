@@ -793,7 +793,7 @@ const EPREUVES = [
 ];
 
 const LABO = { ico:"🧬", nom:"Le Labo génétique", court:"Labo génétique", zone:"Le Labo génétique", lieu:"devant la maison",
-  route:"Toutes les épreuves sont terminées ! Rendez-vous devant la maison et attendez les autres équipes : on va démasquer le petit fugitif tous ensemble." };
+  route:"🦕 Réunissez toute l'équipe {equipe} pour découvrir la fin !" };
 
 /* 4 équipes, 4 épreuves : chaque équipe commence ailleurs et tourne dans le même sens.
    À chaque round, chaque épreuve accueille exactement une équipe. */
@@ -855,7 +855,7 @@ const ENIGMES = [
 /* Le gage : donné par l'app quand une équipe perd un duel (chrono à zéro).
    Pour varier, ajouter d'autres gages dans la liste : l'app en tirera un au hasard. */
 const GAGES = [
-  "Chaque membre de l'équipe, à tour de rôle, imite le cri de 2 dinosaures différents. Pas de copie : chacun doit trouver les siens !"
+  "Chaque membre de l'équipe, à tour de rôle, imite le cri d'un dinosaure. Pas de copie : chacun le sien !"
 ];
 
 /* ============================================================
@@ -903,6 +903,7 @@ function regles(r){
     (r.gagner ? '<p class="rule-win">🏆 ' + r.gagner + "</p>" : "") +
     (r.sinon ? '<p class="rule-lose">⏰ ' + r.sinon + "</p>" : "");
 }
+const piste = e => e.route.replace(/\{equipe\}/g, EQUIPES[state.equipe].nom);   // texte de piste, avec le nom de l'équipe
 const ou = e => e.zone + (e.lieu ? " · 📍 " + e.lieu : "");   // nom de l'épreuve + lieu réel
 const duree = sec => sec >= 60 ? Math.round(sec / 60) + " minute" + (sec >= 120 ? "s" : "") : sec + " secondes";
 const mmss = sec => Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
@@ -1091,11 +1092,11 @@ function showMap(){
     const row = '<span class="row"><span class="ico">' + (etat === "off" ? "❔" : e.ico) + '</span>' +
                 '<span class="txt"><span class="nm">' + nom + '</span><span class="zn">' + zone + '</span></span>' + badge + '</span>';
     if(etat === "now" && lab){
-      step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + e.route + '</p>' +
+      step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + piste(e) + '</p>' +
         '<div class="now-status" id="now-status"></div>' +
-        (h.phase === "labo" ? '<button class="start" onclick="openLab()">🧬 Au signal d\'Ornella : entrer au labo</button>' : "") + '</div>';
+        (h.phase === "labo" ? '<button class="start" onclick="openLab()">🧬 Découvrir la fin</button>' : "") + '</div>';
     } else if(etat === "now"){
-      step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + e.route + '</p>' +
+      step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + piste(e) + '</p>' +
         '<div class="now-status" id="now-status"></div>' +
         '<button class="start" onclick="openPuzzle(' + idx + ')">▶ Ouvrir l\'épreuve ' + (pos + 1) + '</button></div>';
     } else if(etat === "late"){
@@ -1120,7 +1121,7 @@ function majStatut(h){
   el.textContent = enAvance ? (h.r + 1 >= TOURS ? "🧬 Rendez-vous au labo dans " + mmss(h.reste) : "⏳ Départ dans " + mmss(h.reste + TRAJET) + " · restez sur place en attendant la fin du tour")
     : h.phase === "trajet" ? "⏳ Départ dans " + mmss(h.reste) + " · rejoignez le lieu et lisez les règles"
     : h.phase === "epreuve" ? "🟢 C'est parti ! Il reste " + mmss(h.reste)
-    : h.phase === "labo" ? "🧬 Retrouvez toutes les équipes devant la maison. On entre au labo ensemble, au signal d'Ornella."
+    : h.phase === "labo" ? "🧬 Toute l'équipe est là ? C'est parti pour la fin !"
     : "";
 }
 
@@ -1286,7 +1287,7 @@ function openMove(enAvance){
   // Ornella donne la direction ; si elle présente aussi l'épreuve, un seul bloc
   const intro = labo ? null : (dest.cherche ? { t: dest.cherche.texte, v: dest.cherche.voix } : { t: dest.arrivee, v: dest.voix });
   const fusion = intro && (intro.v || ORNELLA) === ORNELLA;
-  document.getElementById("mv-radio").innerHTML = radio(fusion ? [dest.route, intro.t] : [dest.route]);
+  document.getElementById("mv-radio").innerHTML = radio(fusion ? [piste(dest), intro.t] : [piste(dest)]);
   document.getElementById("mv-chrono").style.display = "flex";
   document.getElementById("mv-chrono-l").textContent = apercu ? (labo ? "Rendez-vous au labo dans" : "Départ de l'épreuve dans")
     : labo ? "Révélation commune dans" : enCours ? "Temps restant" : "Départ de l'épreuve dans";
@@ -1401,7 +1402,7 @@ function openFound(i){
   document.getElementById("fd-k").textContent = "Indice " + n + " sur 4" + (t ? " · épreuve réussie en " + mmss(t) : "");
   document.getElementById("fd-name").textContent = e.preuve.nom;
   document.getElementById("fd-radio").innerHTML = radio([e.preuve.texte], e.voix);
-  document.getElementById("fd-next").textContent = suivante.route;
+  document.getElementById("fd-next").textContent = piste(suivante);
   document.getElementById("clock-found").innerHTML = clockText(horloge());
   show("scr-found");
 }
