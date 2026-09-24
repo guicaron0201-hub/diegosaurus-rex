@@ -404,6 +404,40 @@ button.reset{
 @keyframes chompT{0%,30%{opacity:0;transform:scale(.4)}40%{opacity:1;transform:scale(1.15)}50%{transform:scale(1)}66%{opacity:1}82%,100%{opacity:0;transform:scale(1.1)}}
 .chomp.on ~ .wrap{animation:secousse .35s .7s ease 1}
 @keyframes secousse{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+
+/* ---------- labo : indices + liste des suspects ---------- */
+.lab-indices{margin:0 0 20px;padding:14px;border-radius:12px;background:rgba(185,139,62,.12);border:2px solid var(--crate)}
+.lab-indices b{display:block;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-bright);margin-bottom:8px}
+.lab-indices .li{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:16px;font-weight:700;border-top:1px solid rgba(185,139,62,.25)}
+.lab-indices .li:first-of-type{border-top:0}
+.lab-indices .li span{font-size:24px;width:32px;text-align:center}
+.lab-h{font-size:19px;color:#FF9E88;margin:0;text-align:center}
+.lab-sub{margin:4px 0 14px;text-align:center;font-size:14px;color:var(--bone-dim)}
+.suspect{position:relative;margin:0 0 14px;padding:14px 14px 12px;border-radius:6px;background:#F3E9D2;color:#2a1f0e;
+  box-shadow:0 8px 18px rgba(0,0,0,.45);transition:opacity .3s,filter .3s}
+.suspect:nth-child(odd){transform:rotate(-.8deg)}
+.suspect:nth-child(even){transform:rotate(.8deg)}
+.sp-n{font-size:11px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#8f2d1a}
+.sp-h{display:flex;align-items:center;gap:10px;margin:4px 0 8px}
+.sp-ico{font-size:40px;line-height:1}
+.sp-h b{font-size:20px}
+.suspect ul{margin:0 0 10px;padding:0 0 0 18px;font-size:15px;line-height:1.55}
+.suspect button{margin:0;padding:12px;font-size:14px;background:#2a1f0e;color:#F3E9D2;box-shadow:none}
+.sp-verdict{display:none;margin-top:10px;font-size:14px;font-weight:700;color:#8f2d1a}
+.suspect.innocent{filter:grayscale(1);opacity:.55}
+.suspect.innocent button{display:none}
+.suspect.innocent .sp-verdict{display:block}
+.suspect.innocent::after{content:"INNOCENT";position:absolute;top:18px;right:10px;transform:rotate(12deg);
+  padding:4px 10px;border:3px solid #8f2d1a;color:#8f2d1a;font-weight:900;letter-spacing:.12em;font-size:15px;border-radius:4px}
+
+/* ---------- séquence de révélation ---------- */
+.rv-seq{min-height:calc(100dvh - 60px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:0 10px}
+.rv-seq.in > *{animation:pop .5s ease both}
+.rv-ico{font-size:90px;line-height:1}
+.rv-t{margin:0;font-size:28px;font-weight:900;color:var(--amber-bright);letter-spacing:.04em}
+.rv-s{margin:0;font-size:18px;min-height:1.6em;color:var(--bone)}
+.rv-bar{width:86%;max-width:340px}
+.rv-cuisine{font-size:18px !important;color:var(--bone) !important;margin:0 auto 16px !important}
 </style>
 </head>
 <body>
@@ -621,53 +655,45 @@ button.reset{
     <button class="ghost" style="width:auto;margin:0;padding:7px 12px" onclick="showMap()">← Parcours</button>
     <span>Étape <strong>finale</strong></span>
   </div>
-  <div class="crate lab" style="display:block;border-color:var(--crate);background:linear-gradient(180deg,#2a2010,#1d1809)">
-    <div style="text-align:center;font-size:40px;margin-bottom:8px">🧬</div>
-    <h2 style="text-align:center;margin-bottom:14px">Labo génétique</h2>
-
-    <!-- 5a. identifier le Diegosaurus Rex -->
-    <div id="lab-accuse">
-      <div class="radio" id="lab-intro"></div>
-      <div class="proofs four" id="lab-proofs" style="margin:0"></div>
-      <div class="suspects" id="suspects"></div>
-      <div id="msg-accuse" class="msg"></div>
-    </div>
-
-    <!-- 5b. code maître -->
-    <div id="lab-code" style="display:none">
-      <div class="radio" id="lab-verdict"></div>
-      <button class="start" id="btn-adn" onclick="analyseADN()">🧬 Lancer l'analyse ADN</button>
-      <div id="adn" class="adn">
-        <div class="adn-bar"><i id="adn-fill"></i></div>
-        <div class="adn-pct" id="adn-pct">0 %</div>
-        <div class="adn-step" id="adn-step"></div>
-      </div>
-      <div id="lab-wait" class="lab-wait">
-        <b>✅ Correspondance ADN : 100 %</b>
-        <p>C'est bien lui. Le radar va maintenant localiser le Diegosaurus Rex… <strong>pour toutes les équipes en même temps</strong>. Gardez le téléphone en main et restez devant la maison !</p>
-        <div class="chrono-box" style="margin:14px 0 0;position:static"><span class="l">Révélation dans</span><span class="t" id="lab-time">5:00</span></div>
-      </div>
-    </div>
+  <div style="text-align:center;margin:4px 0 14px">
+    <div style="font-size:44px;line-height:1">🧬</div>
+    <h1 class="stencil" style="font-size:22px;color:var(--amber-bright);margin:6px 0 0">Le Labo génétique</h1>
   </div>
+  <div class="radio" id="lab-intro"></div>
+
+  <!-- les 4 indices de l'équipe, bien visibles -->
+  <div class="lab-indices">
+    <b>🔍 Vos 4 indices</b>
+    <div id="lab-indices"></div>
+  </div>
+
+  <!-- la liste des suspects -->
+  <h2 class="stencil lab-h">🚨 Liste des suspects</h2>
+  <p class="lab-sub">Un seul correspond à vos 4 indices. Désignez-le !</p>
+  <div id="suspects"></div>
 </section>
 
 <!-- ============ 6. FINAL ============ -->
 <section id="scr-win" class="screen">
-  <!-- 1. le radar s'emballe -->
-  <div id="rv-radar" class="rv-radar">
-    <div class="radar"><i></i></div>
-    <div class="rv-radar-t" id="rv-radar-t">📡 Radar activé…</div>
+  <!-- 1. la séquence : bravo → analyse ADN → localisation -->
+  <div id="rv-seq" class="rv-seq">
+    <div class="rv-ico" id="rv-ico"></div>
+    <div class="radar" id="rv-radar"><i></i></div>
+    <h2 class="rv-t" id="rv-t"></h2>
+    <div class="adn-bar rv-bar" id="rv-bar"><i id="rv-fill"></i></div>
+    <p class="rv-s" id="rv-s"></p>
   </div>
   <!-- 2. la révélation -->
   <div id="rv-fin">
     <div class="tape"></div>
     <div class="crate final reveal">
-      <div class="tag">🦕 Diegosaurus Rex · localisé</div>
+      <div class="tag">🦕 Diegosaurus Rex · retrouvé !</div>
+      <h2>On l'a retrouvé !</h2>
+      <p class="rv-cuisine">Il était <strong>dans la cuisine</strong>… en train de piquer des parts de son gâteau d'anniversaire ! 🍰</p>
       <img class="diego" src="diego.jpg" alt="Diego" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'big',textContent:'🦕'}))">
-      <h2>C'est Diego !</h2>
-      <p>Le plus rare, le plus mignon et le moins dormeur des dinosaures fête aujourd'hui son <strong style="color:var(--bone)">1er anniversaire</strong>.</p>
+      <p>C'est bien lui : <strong style="color:var(--bone)">le Diegosaurus Rex</strong>, alias <strong style="color:var(--amber-bright)">DIEGO</strong>, qui fête aujourd'hui son 1er anniversaire.</p>
       <div class="go">🎂 Joyeux anniversaire Diego !</div>
-      <p style="margin-top:14px;font-size:14px">Place au gâteau… et attention, le T-Rex n'est jamais loin de lui.</p>
+      <p style="margin-top:14px;font-size:14px">Tous à la cuisine… avant qu'il ne reste plus une miette. Et attention, le T-Rex n'est jamais loin de lui.</p>
     </div>
     <div class="crate bilan">
       <div class="tag" id="rv-team"></div>
@@ -768,7 +794,7 @@ const EPREUVES = [
 ];
 
 const LABO = { ico:"🧬", nom:"Le Labo génétique", court:"Labo génétique", zone:"Le Labo génétique", lieu:"devant la maison",
-  route:"Toutes les épreuves sont terminées ! Toutes les équipes, rendez-vous devant la maison : le labo génétique va identifier le Diegosaurus Rex." };
+  route:"Toutes les épreuves sont terminées ! Rendez-vous devant la maison avec vos 4 indices : le labo génétique va démasquer le Diegosaurus Rex." };
 
 /* 4 équipes, 4 épreuves : chaque équipe commence ailleurs et tourne dans le même sens.
    À chaque round, chaque épreuve accueille exactement une équipe. */
@@ -780,19 +806,28 @@ const EQUIPES = [
 ];
 
 /* Fiches du labo : reconnaître le Diegosaurus Rex grâce aux 4 indices */
-const FICHES = [
-  { ico:"🦖", nom:"Géant · pointure 58 · dort 14 h par jour",       non:"Non : pointure 58, ce n'est pas du 21 ! Et lui dort comme un bébé… enfin, mieux qu'un bébé." },
-  { ico:"🦏", nom:"Grand · 3 cornes · fait ses nuits",              non:"Non : lui fait des nuits complètes, et il ne boit pas au biberon." },
-  { ico:"🥚", nom:"Pointure 21 · biberon · zéro nuit · mâchouille tout", oui:true },
-  { ico:"🦅", nom:"Petit · vole · picore des graines",              non:"Non : il vole, donc pas d'empreintes au sol. Et il n'a jamais mâchouillé une télécommande." }
+/* Liste des suspects du labo : un seul correspond aux 4 indices */
+const SUSPECTS = [
+  { ico:"🦖", nom:"Le T-Rex", traits:["Pointure 58", "Mange de la viande", "Dort 14 h par nuit", "Passion : rugir très fort"],
+    non:"Innocent ! Pointure 58, ce n'est pas du 21. Et lui dort comme un loir." },
+  { ico:"🦎", nom:"Le Vélociraptor", traits:["Pointure 32", "Mange des insectes", "Dort le jour", "Passion : courir vite"],
+    non:"Innocent ! Pointure 32, bien trop grand. Et il n'a jamais touché une télécommande." },
+  { ico:"🥚", nom:"Espèce inconnue", traits:["Pointure 21", "Boit au biberon", "Ne dort jamais", "Passion : mâchouiller les télécommandes"],
+    oui:true },
+  { ico:"🦏", nom:"Alain le Tricératops", traits:["Pointure 45", "Mange de l'herbe", "Fait ses nuits", "Passion : la pétanque"],
+    non:"Innocent ! Alain fait ses nuits et ne boit pas au biberon… du moins pas en public." },
+  { ico:"🦅", nom:"Le Ptérodactyle", traits:["Aucune empreinte : il vole", "Mange du poisson", "Dort perché", "Passion : planer"],
+    non:"Innocent ! Il vole : impossible de laisser une empreinte au sol." }
 ];
-const LAB_INTRO = ["Bravo, rangers ! Le labo a 4 fiches d'espèces. <strong>Laquelle est celle du Diegosaurus Rex ?</strong>",
-  "Comparez avec vos quatre indices."];
+/* Résumé de chaque indice, affiché au labo (même vocabulaire que les fiches) */
+const RESUME_INDICE = { "👣":"Pointure 21", "🍼":"Boit au biberon", "🌙":"Ne dort jamais", "📱":"Mâchouille les télécommandes" };
+const LAB_INTRO = ["Bravo, rangers ! Vos 4 indices sont arrivés au labo.",
+  "Le Diegosaurus Rex se cache parmi ces <strong>5 suspects</strong>. Comparez chaque fiche avec vos indices et désignez le bon !"];
 const TOP_TXT = (e, duree, trajet) => [
   "Rangers, préparez-vous ! Quand je dirai <strong>« 3, 2, 1… TOP ! »</strong>, toutes les équipes appuient en même temps sur le bouton.",
   "Après le TOP, vous avez " + trajet + " pour rejoindre votre première épreuve : <strong>" + e.court + "</strong> (📍 " + (e.lieu || e.zone) + "). <strong>Ne commencez qu'à la fin de ce compte à rebours !</strong>",
   "Chaque épreuve dure ensuite " + duree + ". À la fin, l'écran vous envoie tout seul à la suivante."];
-const VERDICT = "Identification réussie ! Pointure 21, un biberon toutes les trois heures, zéro nuit complète et une passion pour les télécommandes : c'est bien le Diegosaurus Rex. Lancez l'analyse ADN pour le confirmer !";
+const VERDICT = "";
 
 /* En réserve pour plus tard : une épreuve avec type:"enigmes" et nb:3 utilise ces énigmes.
    Énigmes façon Père Fouras : "ok" liste les réponses acceptées
@@ -839,7 +874,6 @@ const TEST = /[?&]test/.test(location.search);
 const DUREE  = TEST ? 40 : 10 * 60;   // durée d'une épreuve, en secondes
 const TRAJET = TEST ? 15 :  1 * 60;   // temps pour changer d'épreuve, en secondes
 const TOURS  = 4;
-const FINAL  = TEST ? 30 : 5 * 60;    // temps au labo avant la révélation commune, en secondes
 
 let state = null, current = null, introPage = 0, lastKey = null;
 
@@ -893,20 +927,14 @@ function horloge(){
   if(!state || !state.top) return null;
   const t = Math.max(0, Math.floor((Date.now() - state.top) / 1000));
   const cycle = TRAJET + DUREE, r = Math.floor(t / cycle);
-  if(r >= TOURS){
-    const l = t - TOURS * cycle;
-    return l < FINAL
-      ? { phase:"labo", r:TOURS, reste: FINAL - l, key:"labo" }
-      : { phase:"revelation", r:TOURS, reste:0, key:"revelation" };
-  }
+  if(r >= TOURS) return { phase:"labo", r:TOURS, reste:0, key:"labo" };   // plus de chrono au labo
   const w = t - r * cycle;
   return w < TRAJET
     ? { phase:"trajet",  r, reste: TRAJET - w, key:"t" + r }
     : { phase:"epreuve", r, reste: cycle - w,  key:"e" + r };
 }
 function clockText(h){
-  if(h.phase === "revelation") return "🦕 Le Diegosaurus Rex est localisé !";
-  if(h.phase === "labo") return "🧬 Tous devant la maison · révélation dans <b>" + mmss(h.reste) + "</b>";
+  if(h.phase === "labo") return "🧬 Toutes les épreuves sont finies · direction le labo";
   const e = EPREUVES[ordre()[h.r]];
   return h.phase === "trajet"
     ? "🚶 Trajet vers " + e.court + " · <b>" + mmss(h.reste) + "</b>"
@@ -926,8 +954,7 @@ document.addEventListener("visibilitychange", () => { if(document.visibilityStat
 
 /* Aller sur l'écran qui correspond au moment de la partie */
 function allerPhase(h){
-  if(h.phase === "revelation") return openReveal(true);
-  if(h.phase === "labo") return openMove();
+  if(h.phase === "labo") return showMap();
   // début d'une épreuve : elle s'ouvre toute seule, avec la morsure du dino
   if(h.phase === "epreuve" && !reussi(ordre()[h.r])){
     openPuzzle(ordre()[h.r]);
@@ -942,14 +969,14 @@ function allerPhase(h){
 /* Test : avancer l'horloge jusqu'à la fin de la phase en cours */
 function sauterPhase(){
   const h = horloge();
-  if(!h || h.phase === "revelation") return;
+  if(!h || h.phase === "labo") return;
   state.top -= h.reste * 1000;
   save();
   tick();
 }
 function majBoutonTest(){
   const skip = document.getElementById("btn-skip"), h0 = horloge();
-  skip.style.display = h0 && h0.phase !== "revelation" && !state.fin ? "inline-block" : "none";
+  skip.style.display = h0 && h0.phase !== "labo" && !state.fin ? "inline-block" : "none";
   if(h0) skip.textContent = h0.phase === "labo" ? "⏩ Aller à la révélation (test)"
     : h0.phase === "trajet" ? "⏩ Fin de la minute (test)" : "⏩ Fin des " + duree(DUREE) + " (test)";
 }
@@ -957,7 +984,6 @@ function tick(){
   majBoutonTest();
   if(!state || !state.top || state.fin) return;
   const h = horloge();
-  if(h.phase === "revelation" && lastKey === null){ lastKey = h.key; return openReveal(false); }
   ["clock-map","clock-found"].forEach(id => document.getElementById(id).innerHTML = clockText(h));
 
   // chrono de l'écran d'épreuve
@@ -971,7 +997,6 @@ function tick(){
   }
   // compte à rebours du trajet
   document.getElementById("mv-time").textContent = mmss(h.phase === "trajet" || h.phase === "labo" ? h.reste : 0);
-  document.getElementById("lab-time").textContent = mmss(h.phase === "labo" ? h.reste : 0);
   majLancer(h);
   majStatut(h);
 
@@ -1069,7 +1094,7 @@ function showMap(){
     if(etat === "now" && lab){
       step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + e.route + '</p>' +
         '<div class="now-status" id="now-status"></div>' +
-        (h.phase === "labo" ? '<button class="start" onclick="openLab()">Nous sommes au labo →</button>' : "") + '</div>';
+        (h.phase === "labo" ? '<button class="start" onclick="openLab()">🧬 Entrer au labo</button>' : "") + '</div>';
     } else if(etat === "now"){
       step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + e.route + '</p>' +
         '<div class="now-status" id="now-status"></div>' +
@@ -1096,7 +1121,7 @@ function majStatut(h){
   el.textContent = enAvance ? (h.r + 1 >= TOURS ? "🧬 Rendez-vous au labo dans " + mmss(h.reste) : "⏳ Départ dans " + mmss(h.reste + TRAJET) + " · restez sur place en attendant la fin du tour")
     : h.phase === "trajet" ? "⏳ Départ dans " + mmss(h.reste) + " · rejoignez le lieu et lisez les règles"
     : h.phase === "epreuve" ? "🟢 C'est parti ! Il reste " + mmss(h.reste)
-    : h.phase === "labo" ? "🧬 Révélation commune dans " + mmss(h.reste)
+    : h.phase === "labo" ? "🧬 Toutes les épreuves sont finies ! Rejoignez le labo devant la maison."
     : "";
 }
 
@@ -1383,42 +1408,49 @@ function openFound(i){
 }
 
 /* ============================================================
-   LABO : identifier le Diegosaurus Rex, puis radar (code maître)
+   LABO : la liste des suspects
    ============================================================ */
 function openLab(){
-  if(!["labo","revelation"].includes(horloge().phase)) return showMap();
-  if(nbFaits() < EPREUVES.length) return showMap();   // indices manquants : le parcours indique lesquels
+  if(horloge().phase !== "labo") return showMap();
+  if(nbFaits() < EPREUVES.length){   // indices manquants : le parcours indique lesquels
+    showMap();
+    return alert("Il vous manque encore des indices ! Récupérez-les sur le parcours avant d'entrer au labo.");
+  }
+  if(state.fin) return openReveal(false);
   document.getElementById("lab-intro").innerHTML = radio(LAB_INTRO);
-  document.getElementById("lab-proofs").innerHTML = proofsHTML();
+  document.getElementById("lab-indices").innerHTML = ordre().map(i => {
+    const p = EPREUVES[i].preuve;
+    return '<div class="li"><span>' + p.ico + '</span>' + (RESUME_INDICE[p.ico] || p.nom) + '</div>';
+  }).join("");
   const box = document.getElementById("suspects");
   box.innerHTML = "";
-  FICHES.forEach(s => {
-    const b = document.createElement("button");
-    b.innerHTML = "<span>" + s.ico + "</span>" + s.nom;
-    b.onclick = () => accuse(s, b);
-    box.appendChild(b);
+  SUSPECTS.forEach((sp, k) => {
+    const c = document.createElement("div");
+    c.className = "suspect";
+    c.innerHTML = '<div class="sp-n">Suspect n°' + (k + 1) + '</div>' +
+      '<div class="sp-h"><span class="sp-ico">' + sp.ico + '</span><b>' + sp.nom + '</b></div>' +
+      '<ul>' + sp.traits.map(t => "<li>" + t + "</li>").join("") + '</ul>' +
+      '<button onclick="accuse(' + k + ', this)">👉 C\'est lui !</button>' +
+      '<div class="sp-verdict"></div>';
+    box.appendChild(c);
   });
-  document.getElementById("msg-accuse").classList.remove("show");
-  document.getElementById("lab-verdict").innerHTML = radio([VERDICT]);
-  labStep(state.identifie);
-  document.getElementById("btn-adn").style.display = "block";
-  document.getElementById("adn").style.display = "none";
-  document.getElementById("lab-wait").style.display = "none";
-  if(state.adn) afficherAttente();
   show("scr-lab");
 }
-function labStep(trouve){
-  document.getElementById("lab-accuse").style.display = trouve ? "none" : "block";
-  document.getElementById("lab-code").style.display = trouve ? "block" : "none";
-}
-function accuse(s, b){
-  const m = document.getElementById("msg-accuse");
-  if(!s.oui){ b.classList.add("no"); return flash(m, s.non); }
+function accuse(k, btn){
+  const sp = SUSPECTS[k], carte = btn.closest(".suspect");
+  if(!sp.oui){
+    carte.classList.add("innocent");
+    carte.querySelector(".sp-verdict").textContent = "❌ " + sp.non;
+    return;
+  }
+  if(!confirm("C'est votre dernier mot ? Le suspect n°" + (k + 1) + " ?")) return;
   state.identifie = true; save();
-  labStep(true);
-  window.scrollTo(0,0);
+  openReveal(true);
 }
-/* Analyse ADN : une petite animation, puis on attend la révélation commune */
+
+/* ============================================================
+   LA RÉVÉLATION : bravo → analyse ADN → localisation → photo
+   ============================================================ */
 const ETAPES_ADN = [
   "Extraction de l'ADN du biberon…",
   "Mesure de l'empreinte : pointure 21…",
@@ -1426,40 +1458,7 @@ const ETAPES_ADN = [
   "Analyse de la bave sur la télécommande…",
   "Comparaison avec la base du parc…"
 ];
-function afficherAttente(){
-  document.getElementById("btn-adn").style.display = "none";
-  document.getElementById("adn").style.display = "none";
-  document.getElementById("lab-wait").style.display = "block";
-}
-function analyseADN(){
-  document.getElementById("btn-adn").style.display = "none";
-  document.getElementById("adn").style.display = "block";
-  const fill = document.getElementById("adn-fill"), pct = document.getElementById("adn-pct"), step = document.getElementById("adn-step");
-  const total = 7000, t0 = Date.now();
-  const anim = setInterval(() => {
-    const x = Math.min(1, (Date.now() - t0) / total);
-    fill.style.width = (x * 100) + "%";
-    pct.textContent = Math.floor(x * 100) + " %";
-    step.textContent = ETAPES_ADN[Math.min(ETAPES_ADN.length - 1, Math.floor(x * ETAPES_ADN.length))];
-    if(x >= 1){
-      clearInterval(anim);
-      state.adn = true; save();
-      afficherAttente();
-    }
-  }, 80);
-}
-
-/* ============================================================
-   LA GRANDE RÉVÉLATION — sur les 4 téléphones en même temps
-   ============================================================ */
-const RADAR = [
-  "📡 Radar activé…",
-  "📡 Signal détecté !",
-  "📡 Distance : 50 mètres…",
-  "📡 Distance : 10 mètres…",
-  "📡 Distance : 2 mètres…",
-  "📡 IL EST JUSTE LÀ !"
-];
+const RADAR = ["Signal détecté !", "Il n'est pas loin…", "Il est dans la maison…", "Il est… DANS LA CUISINE !"];
 function bilan(){
   const gagnes = Object.keys(state.gagne || {}).length;
   const gages = Object.keys(state.gageFait || {}).length;
@@ -1474,16 +1473,48 @@ function bilan(){
     "<div><b>" + gagnes + "/4</b><span>épreuves gagnées</span></div>" +
     "<div><b>" + gages + "</b><span>gage" + (gages > 1 ? "s" : "") + " fait" + (gages > 1 ? "s" : "") + "</span></div>";
 }
-function openReveal(anime){
+const pause = ms => new Promise(r => setTimeout(r, ms));
+function etape(ico, titre, sous, opts){
+  opts = opts || {};
+  const el = id => document.getElementById(id);
+  el("rv-ico").textContent = ico || "";
+  el("rv-ico").style.display = opts.radar ? "none" : "block";
+  el("rv-radar").style.display = opts.radar ? "block" : "none";
+  el("rv-bar").style.display = opts.barre ? "block" : "none";
+  el("rv-t").textContent = titre;
+  el("rv-s").textContent = sous || "";
+  const seq = el("rv-seq"); seq.classList.remove("in"); void seq.offsetWidth; seq.classList.add("in");
+}
+async function openReveal(anime){
   state.fin = state.fin || Date.now(); save();
   bilan();
-  const radar = document.getElementById("rv-radar"), fin = document.getElementById("rv-fin");
+  const seq = document.getElementById("rv-seq"), fin = document.getElementById("rv-fin");
   show("scr-win");
-  if(!anime){ radar.style.display = "none"; fin.style.display = "block"; return; }
-  radar.style.display = "flex"; fin.style.display = "none";
-  const txt = document.getElementById("rv-radar-t");
-  RADAR.forEach((l,k) => setTimeout(() => { txt.textContent = l; alerte(); }, k * 1400));
-  setTimeout(() => { radar.style.display = "none"; fin.style.display = "block"; alerte(); }, RADAR.length * 1400 + 400);
+  if(!anime){ seq.style.display = "none"; fin.style.display = "block"; return; }
+  seq.style.display = "flex"; fin.style.display = "none";
+
+  etape("🎉", "BRAVO !", "Vous avez démasqué le suspect n°3 : l'espèce inconnue !");
+  alerte(); await pause(2600);
+
+  etape("🧬", "Analyse de l'ADN…", ETAPES_ADN[0], { barre:true });
+  const fill = document.getElementById("rv-fill"), t0 = Date.now(), total = 5200;
+  await new Promise(fini => {
+    const anim = setInterval(() => {
+      const x = Math.min(1, (Date.now() - t0) / total);
+      fill.style.width = (x * 100) + "%";
+      document.getElementById("rv-s").textContent = ETAPES_ADN[Math.min(ETAPES_ADN.length - 1, Math.floor(x * ETAPES_ADN.length))];
+      if(x >= 1){ clearInterval(anim); fini(); }
+    }, 80);
+  });
+  etape("✅", "Correspondance ADN : 100 %", "C'est bien le Diegosaurus Rex !");
+  alerte(); await pause(2400);
+
+  etape("", "Localisation en cours…", RADAR[0], { radar:true });
+  for(const l of RADAR){ document.getElementById("rv-s").textContent = l; alerte(); await pause(1500); }
+
+  seq.style.display = "none"; fin.style.display = "block";
+  window.scrollTo(0, 0);
+  alerte();
 }
 function showWin(){ openReveal(false); }
 
@@ -1571,8 +1602,7 @@ else {
   const h = horloge();
   lastKey = h.key;
   garderEcran();
-  if(h.phase === "revelation") openReveal(false);
-  else if(h.phase === "labo") openMove();
+  if(h.phase === "labo") showMap();
   else if(h.phase === "epreuve" && !reussi(ordre()[h.r])) openPuzzle(ordre()[h.r]);
   else showMap();
 }
