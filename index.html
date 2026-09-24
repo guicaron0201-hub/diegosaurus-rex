@@ -379,6 +379,8 @@ button.launch.pret .fill{display:none}
 .proofs div.new{border-color:var(--ok);background:rgba(111,191,115,.2);box-shadow:0 0 0 3px rgba(111,191,115,.35);animation:pop .6s ease both}
 .big.pop{animation:pop .7s .15s ease both}
 @keyframes pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+
+.now-status{margin:10px 0 0;padding:9px 12px;border-radius:8px;background:rgba(232,163,61,.12);border:1px solid rgba(232,163,61,.45);font-size:14px;font-weight:700;color:var(--amber-bright)}
 </style>
 </head>
 <body>
@@ -467,6 +469,11 @@ button.launch.pret .fill{display:none}
     <div class="radio" id="pz-radio"></div>
     <div class="hint"><b>Les règles</b><div id="pz-hint"></div></div>
     <div id="msg-chrono" class="msg err"></div>
+    <div class="launch-wrap" id="pz-launch">
+      <button class="launch" id="pz-start" onclick="lancerEpreuve()" disabled>
+        <span class="fill" id="pz-fill"></span><span class="lbl" id="pz-start-t">⏳ Lancer l'épreuve</span>
+      </button>
+    </div>
     <div class="gage" id="pz-gage"></div>
     <div id="pz-letters">
       <label>Les lettres trouvées (dans le désordre)</label>
@@ -530,9 +537,8 @@ button.launch.pret .fill{display:none}
     </div>
     <div class="radio" id="fd-radio" style="margin-top:16px"></div>
     <div class="next"><b>Prochaine piste</b><span id="fd-next"></span></div>
-    <p class="wait">⏱️ À la fin du tour, l'écran vous enverra tout seul à la suite.</p>
-    <button class="start" onclick="suivante()">➡️ Épreuve suivante</button>
-    <button class="ghost" onclick="showMap()">Voir notre parcours</button>
+    <p class="wait">⏱️ La prochaine épreuve se lance depuis le parcours, à la fin du tour.</p>
+    <button class="start" onclick="showMap()">↩️ Retour au parcours</button>
   </div>
 </section>
 
@@ -575,11 +581,6 @@ button.launch.pret .fill{display:none}
     </div>
 
     <button id="mv-go" onclick="goMove()">Nous sommes au labo →</button>
-    <div class="launch-wrap" id="mv-launch">
-      <button class="launch" id="mv-start" onclick="lancerEpreuve()" disabled>
-        <span class="fill" id="mv-fill"></span><span class="lbl" id="mv-start-t">⏳ Lancer l'épreuve</span>
-      </button>
-    </div>
   </div>
 </section>
 
@@ -895,17 +896,12 @@ document.addEventListener("visibilitychange", () => { if(document.visibilityStat
 
 /* Aller sur l'écran qui correspond au moment de la partie */
 function allerPhase(h){
-  apercu = false;
   if(h.phase === "revelation") return openReveal(true);
-  if(h.phase === "epreuve"){
-    // déjà sur l'épreuve (règles ouvertes depuis le parcours) : on l'actualise
-    if(document.getElementById("scr-puzzle").classList.contains("on") && current === ordre()[h.r]){
-      openPuzzle(current);
-      return flash(document.getElementById("msg-chrono"), "🟢 C'est parti ! L'épreuve commence maintenant.", true);
-    }
-    return openMove();   // sinon : écran d'attente, le bouton « Lancer l'épreuve » devient vert
-  }
-  openMove();
+  if(h.phase === "labo") return openMove();
+  // l'équipe a déjà ouvert l'épreuve du tour : on l'actualise (le bouton devient vert)
+  if(document.getElementById("scr-puzzle").classList.contains("on") && current === ordre()[h.r])
+    return openPuzzle(current);
+  showMap();   // sinon : retour au tableau de bord
 }
 /* Test : avancer l'horloge jusqu'à la fin de la phase en cours */
 function sauterPhase(){
@@ -932,14 +928,16 @@ function tick(){
   if(current !== null && document.getElementById("scr-puzzle").classList.contains("on")){
     const pos = etapeDe(current), box = document.getElementById("pz-chrono");
     const avant = h.phase === "trajet" && h.r === pos, pendant = h.phase === "epreuve" && h.r === pos;
-    box.style.display = avant || pendant ? "flex" : "none";
-    document.getElementById("pz-chrono-l").textContent = avant ? "Départ dans" : "Temps restant";
-    document.getElementById("pz-time").textContent = mmss(h.reste);
+    const avance = h.phase === "epreuve" && h.r + 1 === pos && !reussi(current);
+    box.style.display = avant || pendant || avance ? "flex" : "none";
+    document.getElementById("pz-chrono-l").textContent = avant || avance ? "Départ dans" : "Temps restant";
+    document.getElementById("pz-time").textContent = mmss(avance ? h.reste + TRAJET : h.reste);
   }
   // compte à rebours du trajet
   document.getElementById("mv-time").textContent = mmss(h.phase === "trajet" || h.phase === "labo" ? h.reste : 0);
   document.getElementById("lab-time").textContent = mmss(h.phase === "labo" ? h.reste : 0);
   majLancer(h);
+  majStatut(h);
 
   if(h.key !== lastKey){
     const premier = lastKey === null;
@@ -988,7 +986,7 @@ function topDepart(){
   garderEcran();
   state.top = Date.now(); save();
   lastKey = horloge().key;
-  openMove();
+  showMap();
 }
 function restart(){
   if(!confirm("Recommencer la partie depuis le début ?")) return;
@@ -1010,12 +1008,14 @@ function showMap(){
 
   const box = document.getElementById("trail");
   box.innerHTML = "";
+  // épreuve du tour déjà gagnée : on montre la suivante (règles à lire en attendant)
+  const prochaine = h.phase === "epreuve" && reussi(ordre()[h.r]) ? h.r + 1 : -1;
   ordre().map(i => EPREUVES[i]).concat([LABO]).forEach((e,pos) => {
     const lab = e === LABO, idx = EPREUVES.indexOf(e);
     let etat;
-    if(lab) etat = h.phase === "labo" ? "now" : "off";
+    if(lab) etat = h.phase === "labo" || prochaine === pos ? "now" : "off";
     else if(reussi(idx)) etat = "done";
-    else if(pos === h.r) etat = "now";
+    else if(pos === h.r || pos === prochaine) etat = "now";
     else if(pos < h.r) etat = "late";
     else etat = "off";
 
@@ -1025,17 +1025,19 @@ function showMap(){
     const nom = etat === "off" ? "???" : e.court;
     const zone = etat === "off" ? "Piste encore inconnue" : ou(e);
     const badge = etat === "done" ? '<span class="st safe">' + e.preuve.ico + ' Trouvé</span>'
-                : etat === "now"  ? '<span class="st go">' + (h.phase === "trajet" ? "Prochaine" : "En cours") + '</span>'
+                : etat === "now"  ? '<span class="st go">' + (h.phase === "trajet" || pos === prochaine ? "Prochaine" : "En cours") + '</span>'
                 : etat === "late" ? '<span class="st lock">Indice manquant</span>'
                 :                   '<span class="st lock">🔒</span>';
     const row = '<span class="row"><span class="ico">' + (etat === "off" ? "❔" : e.ico) + '</span>' +
                 '<span class="txt"><span class="nm">' + nom + '</span><span class="zn">' + zone + '</span></span>' + badge + '</span>';
     if(etat === "now" && lab){
       step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + e.route + '</p>' +
-        '<button onclick="openLab()">Nous sommes au labo →</button></div>';
+        '<div class="now-status" id="now-status"></div>' +
+        (h.phase === "labo" ? '<button class="start" onclick="openLab()">Nous sommes au labo →</button>' : "") + '</div>';
     } else if(etat === "now"){
       step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + e.route + '</p>' +
-        '<button onclick="openPuzzle(' + idx + ')">' + (h.phase === "trajet" ? "Nous y sommes →" : "Ouvrir l'épreuve →") + '</button></div>';
+        '<div class="now-status" id="now-status"></div>' +
+        '<button class="start" onclick="openPuzzle(' + idx + ')">▶ Ouvrir l\'épreuve ' + (pos + 1) + '</button></div>';
     } else if(etat === "late"){
       const lettres = e.type === "lettres";
       step.innerHTML = dot + '<div class="card">' + row + '<p class="route">' + (lettres ? "Devinez le mot avec les lettres trouvées et tapez-le pour récupérer l\'indice." : "🎲 Gage : " + gageDe(idx) + " Une fois fait, récupérez votre indice.") + '</p>' +
@@ -1048,6 +1050,18 @@ function showMap(){
     box.appendChild(step);
   });
   show("scr-map");
+  majStatut(h);
+}
+/* Ligne d'état de l'épreuve en cours sur le tableau de bord */
+function majStatut(h){
+  const el = document.getElementById("now-status");
+  if(!el || !h) return;
+  const enAvance = h.phase === "epreuve" && reussi(ordre()[h.r]);
+  el.textContent = enAvance ? (h.r + 1 >= TOURS ? "🧬 Rendez-vous au labo dans " + mmss(h.reste) : "⏳ Départ dans " + mmss(h.reste + TRAJET) + " · restez sur place en attendant la fin du tour")
+    : h.phase === "trajet" ? "⏳ Départ dans " + mmss(h.reste) + " · rejoignez le lieu et lisez les règles"
+    : h.phase === "epreuve" ? "🟢 C'est parti ! Il reste " + mmss(h.reste)
+    : h.phase === "labo" ? "🧬 Révélation commune dans " + mmss(h.reste)
+    : "";
 }
 
 /* ============================================================
@@ -1058,18 +1072,25 @@ function openPuzzle(i, trouve){
   const e = EPREUVES[i], h = horloge(), pos = etapeDe(i);
   const pendant = h.phase === "epreuve" && h.r === pos;      // l'épreuve est en cours
   const retard = !reussi(i) && (pos < h.r || h.phase === "labo"); // tour passé sans indice
-  const cherche = e.cherche && !trouve && pendant;             // phase 1 : trouver le maître du jeu caché
+  const lance = !!(state.lance && state.lance[i]);
+  const avance = !reussi(i) && h.phase === "epreuve" && pos === h.r + 1;   // tour d'avant pas encore fini
+  const attente = !reussi(i) && ((h.phase === "trajet" && h.r === pos) || (pendant && !lance) || avance);   // on lit les règles
+  const cherche = e.cherche && !trouve && pendant && lance;    // phase 1 : trouver le maître du jeu caché
   const enigmes = e.type === "enigmes";
 
   document.getElementById("pz-num").textContent = pos + 1;
   document.getElementById("pz-ico").textContent = e.ico;
   document.getElementById("pz-name").textContent = e.nom;
   document.getElementById("pz-zone").textContent = ou(e);
-  document.getElementById("pz-radio").innerHTML = cherche ? radio([e.cherche.texte], e.cherche.voix) : radio([e.arrivee], e.voix);
-  document.getElementById("pz-hint").innerHTML = regles(cherche ? e.cherche.mission : e.indice);
+  const enRecherche = e.cherche && (cherche || attente);
+  document.getElementById("pz-radio").innerHTML = enRecherche ? radio([e.cherche.texte], e.cherche.voix) : radio([e.arrivee], e.voix);
+  document.getElementById("pz-hint").innerHTML = enRecherche
+    ? regles(e.cherche.mission) + (attente ? '<p class="rule-sub">🎯 Une fois le Dresseur trouvé, le duel :</p>' + regles(e.indice) : "")
+    : regles(e.indice);
+  document.getElementById("pz-launch").style.display = attente ? "block" : "none";
   document.getElementById("lbl-code").textContent = e.label || "Code de déverrouillage";
 
-  const jouable = !reussi(i) && ((pendant && !cherche) || retard);
+  const jouable = !reussi(i) && ((pendant && lance && !cherche) || retard);
   document.getElementById("pz-seek").style.display = cherche && !reussi(i) ? "block" : "none";
   const duel = e.type === "duel";
   document.getElementById("pz-code").style.display = jouable && !duel && !(enigmes && !retard) ? "block" : "none";
@@ -1086,7 +1107,9 @@ function openPuzzle(i, trouve){
   m.classList.remove("show");
   if(reussi(i)) flash(m, "✓ Épreuve déjà réussie !", true);
   else if(retard) flash(m, finTexte(i), false, true);
-  else if(h.phase === "trajet" && h.r === pos) flash(m, "⛔ Ne commencez pas encore ! L'épreuve démarre à la fin du compte à rebours. Lisez les règles en attendant.", false, true);
+  else if(h.phase === "trajet" && h.r === pos) flash(m, "⛔ Ne commencez pas encore ! Lisez les règles : le bouton en bas deviendra vert à la fin du compte à rebours.", false, true);
+  else if(avance) flash(m, "⏳ Le tour en cours n'est pas fini : restez sur place et lisez les règles. Le départ sera donné à la fin du compte à rebours.", false, true);
+  else if(attente) flash(m, "🟢 C'est l'heure ! Appuyez sur « Lancer l'épreuve ».", true);
   montrerGage(document.getElementById("pz-gage"), (retard || perdu) && !reussi(i) ? i : null);
 
   const inp = document.getElementById("inp-code");
@@ -1247,45 +1270,37 @@ function openMove(enAvance){
     document.getElementById("msg-late").classList.remove("show");
   }
   document.getElementById("mv-go").style.display = labo && !apercu ? "block" : "none";
-  document.getElementById("mv-launch").style.display = labo && !apercu ? "none" : "block";
   show("scr-move");
   tick();
 }
 /* Bouton « Lancer l'épreuve » : se remplit pendant la minute d'attente, cliquable à la fin */
 function majLancer(h){
-  const btn = document.getElementById("mv-start");
-  if(!btn || h.phase === "labo" || h.phase === "revelation") return;
-  if(apercu){
-    // en avance : le tour en cours n'est pas fini, on attend
-    const attente = h.reste + (h.r + 1 >= TOURS ? 0 : TRAJET);
-    document.getElementById("mv-time").textContent = mmss(attente);
-    document.getElementById("mv-fill").style.width = "0%";
+  const btn = document.getElementById("pz-start");
+  if(!btn || current === null || !["trajet","epreuve"].includes(h.phase)) return;
+  if(h.phase === "epreuve" && etapeDe(current) === h.r + 1){
+    // ouvert en avance : on attend la fin du tour, puis la minute de trajet
+    document.getElementById("pz-fill").style.width = "0%";
     btn.disabled = true; btn.classList.remove("pret");
-    document.getElementById("mv-start-t").textContent = "⏳ Fin du tour dans " + mmss(h.reste);
+    document.getElementById("pz-start-t").textContent = "⏳ Départ dans " + mmss(h.reste + TRAJET);
     return;
   }
+  if(h.r !== etapeDe(current)) return;
   const pret = h.phase === "epreuve";
   const x = pret ? 1 : 1 - h.reste / TRAJET;
-  document.getElementById("mv-fill").style.width = (x * 100) + "%";
+  document.getElementById("pz-fill").style.width = (x * 100) + "%";
   btn.disabled = !pret;
   btn.classList.toggle("pret", pret);
-  document.getElementById("mv-start-t").textContent = pret ? "🟢 Lancer l'épreuve !" : "⏳ Lancer l'épreuve · " + mmss(h.reste);
+  document.getElementById("pz-start-t").textContent = pret ? "🟢 Lancer l'épreuve !" : "⏳ Lancer l'épreuve · " + mmss(h.reste);
 }
 function lancerEpreuve(){
   const h = horloge();
-  if(h.phase !== "epreuve") return;
-  openPuzzle(ordre()[h.r]);
+  if(h.phase !== "epreuve" || h.r !== etapeDe(current)) return;
+  state.lance = state.lance || {};
+  state.lance[current] = true; save();
+  openPuzzle(current);
   flash(document.getElementById("msg-chrono"), "🟢 C'est parti ! L'épreuve commence maintenant.", true);
 }
 function goMove(){ openLab(); }
-/* « Épreuve suivante » : affiche la prochaine épreuve (règles + compte à rebours)
-   en attendant la fin du tour */
-function suivante(){
-  const h = horloge();
-  if(h.phase === "labo" || h.phase === "revelation") return openLab();
-  if(h.phase === "epreuve") return openMove(true);
-  openMove();
-}
 function lateGagne(){
   if(!confirm("Vous avez vraiment battu " + EPREUVES[lateIdx].maitre + " ?")) return;
   state.ok[lateIdx] = true;
@@ -1527,8 +1542,8 @@ else {
   lastKey = h.key;
   garderEcran();
   if(h.phase === "revelation") openReveal(false);
-  else if(h.phase === "epreuve") reussi(ordre()[h.r]) ? showMap() : openPuzzle(ordre()[h.r]);
-  else openMove();
+  else if(h.phase === "labo") openMove();
+  else showMap();
 }
 </script>
 </body>
